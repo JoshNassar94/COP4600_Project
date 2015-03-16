@@ -11,6 +11,8 @@ Precedence Rules:
 [0-9]+                  return NUMBER;
 bye						return BYE;
 cd						return CD;
+ls						return LS;
+printenv				return PRINTENV;
 [a-z]+					return ARG;
 \n                      /* ignore end of line */;
 [ \t]+                  /* ignore whitespace */;
