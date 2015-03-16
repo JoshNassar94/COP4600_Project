@@ -13,7 +13,7 @@ bye						return BYE;
 cd						return CD;
 ls						return LS;
 printenv				return PRINTENV;
-[a-z]+					return ARG;
+alias					return ALIAS;
 \n                      /* ignore end of line */;
 [ \t]+                  /* ignore whitespace */;
 %%

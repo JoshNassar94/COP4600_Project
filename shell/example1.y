@@ -15,10 +15,9 @@ int yywrap()
 main()
 {
 	yyparse();
-	printf("Done");
 } 
 %}
-%token NUMBER BYE CD LS PRINTENV ARG
+%token NUMBER CD LS PRINTENV BYE ALIAS
 %%
 commands: /* empty */
 	| commands command;
@@ -30,14 +29,9 @@ print_enviro:
 	PRINTENV
 	{
 		extern char **environ;
-		int i = 1;
-		char *s = *environ;
-
-		for (; s; i++) 
-		{
-			printf("%s\n", s);
-			s = *(environ+i);
-		}
+		int i=0;
+		while(environ[i])
+			printf("%s\n", environ[i++]);
 	}
 
 change_dir:
@@ -55,7 +49,7 @@ list_contents:
 			wait((int*)0);
 		else if(process == 0)	/* child */
 		{
-			execlp("ls", "ls", (char *) NULL,(char *) NULL );
+			execlp("ls", "ls", "--color=auto",(char *) NULL );
 			exit(1);
 		}
 		else if(process == -1)		/* can't create a new process */
@@ -65,7 +59,7 @@ list_contents:
 		}
 	};
 	
-	exit_now:
+exit_now:
 	BYE
 	{
 		printf("Exiting the shell now...\n");
