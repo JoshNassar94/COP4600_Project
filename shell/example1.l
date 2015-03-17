@@ -9,11 +9,13 @@ Precedence Rules:
 %}
 %%
 [0-9]+                  return NUMBER;
-bye						return BYE;
-cd						return CD;
-ls						return LS;
-printenv				return PRINTENV;
-alias					return ALIAS;
+bye			return BYE;
+cd			return CD;
+ls			return LS;
+printenv		return PRINTENV;
+alias			return ALIAS;
+say			return SAY;
+[a-zA-Z][a-zA-Z0-9]*    yylval.string=strdup(yytext); return WORD;
 \n                      /* ignore end of line */;
 [ \t]+                  /* ignore whitespace */;
 %%
