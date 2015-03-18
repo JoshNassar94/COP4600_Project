@@ -47,7 +47,7 @@ print_enviro:
 change_dir:
 	CD
 	{
-		int cd = chdir("/home/josh");
+		int cd = chdir(getenv("HOME"));
 	};
 	
 list_contents:
