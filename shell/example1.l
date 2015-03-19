@@ -15,6 +15,7 @@ ls			return LS;
 printenv		return PRINTENV;
 alias			return ALIAS;
 say			return SAY;
+\.\.		yylval.string=strdup(yytext); return WORD;
 [a-zA-Z][a-zA-Z0-9]*    yylval.string=strdup(yytext); return WORD;
 \n                      /* ignore end of line */;
 [ \t]+                  /* ignore whitespace */;
