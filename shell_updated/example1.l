@@ -8,6 +8,14 @@ Precedence Rules:
 #include "y.tab.h"
 %}
 %%
+[/]			return FRONTSLASH;
+[\\]			return BACKSLASH;
+[<]			return LESSTHAN;
+[>]			return GREATERTHAN;
+[|]			return PIPE;
+["]			return DOUBLEQUOTE;
+[&]			return AMPERSAND;
+\.			return PERIOD;
 [0-9]+                  return NUMBER;
 cd                  return CD;
 ls			return LS;

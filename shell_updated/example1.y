@@ -17,9 +17,9 @@ int yywrap()
 } 
   
 %}
-%token CD LS BYE NUMBER PRINT_ENV
+%token CD LS BYE NUMBER PRINT_ENV FRONTSLASH PERIOD LESSTHAN GREATERTHAN PIPE DOUBLEQUOTE BACKSLASH AMPERSAND
 
-%union	//not sure how this works really. But it wont complite
+%union
 {
         int number;
         char* string;
@@ -28,56 +28,98 @@ int yywrap()
 %%
 command:
 	| command '\n'
+	| command plain_word {printf("No such command as \"%s\"\n",$<string>2);}
+	| command change_dir_path
 	| command change_dir
 	| command list
 	| command bye
 	| command print_enviro
+	| metacharacters
 	;
+	
+plain_word:
+	WORD{
+		$<string>$ = $<string>1;
+		
+	};
+	
+change_dir_path: 
+	CD WORD {
+		cd_pwd = getenv("PWD");
+		navigate("");
+		DIR *d;
+		struct dirent *dir;
+		d = opendir(cd_pwd);
+		int found = 0;
+		if(d){
+			while ((dir = readdir(d))){
+				if(strcmp($<string>2, dir->d_name) == 0){
+					char* target = cd_pwd;
+					strcat(target,"/");
+					strcat(target, $<string>2);
+					navigate(target);
+					found = 1;
+				}
+			}
+			if(found == 0)
+				printf("No such directory!\n");
+			closedir(d);
+			navigate(cd_pwd);
+			cd_pwd = getenv("PWD");
+		}
+	};
+	| frontslash_word
+	| period
+	| metacharacters
+	;	
+	
+frontslash_word:
+	FRONTSLASH WORD{
+		cd_pwd = getenv("PWD");
+		navigate("");
+		DIR *d;
+		struct dirent *dir;
+		d = opendir(cd_pwd);
+		int found = 0;
+		if(d){
+			while ((dir = readdir(d))){
+				if(strcmp($<string>2, dir->d_name) == 0){
+					char* target = cd_pwd;
+					strcat(target,"/");
+					strcat(target, $<string>2);
+					navigate(target);
+					found = 1;
+				}
+			}
+			if(found == 0)
+				printf("No such directory!\n");
+			closedir(d);
+			navigate(cd_pwd);
+			cd_pwd = getenv("PWD");
+		}
+	};
+	
+period:
+	PERIOD{
+		//Do nothing yet
+	};
 	
 change_dir: 
 	CD {
 		cd_pwd = getenv("PWD");
 		navigate("");
-	}
-	//| pathname {$<string>$ = strcat(getenv("PWD"),$<string>1);}
-	| pathname {
-		/*
-		if(strcmp($<string>1, "..")){
-			char* target = ".";
-			printf("YUP");
-			strcat(target,getenv("PWD"));
-			navigate(target);
-		}
-		*/
-		//else{
-			DIR *d;
-			struct dirent *dir;
-			d = opendir(cd_pwd);
-			int found = 0;
-			if(d){
-				while ((dir = readdir(d))){
-					if(strcmp($<string>1, dir->d_name) == 0){
-						char* target = cd_pwd;
-						strcat(target,"/");
-						strcat(target, $<string>1);
-						navigate(target);
-						found = 1;
-					}
-				}
-				if(found == 0)
-					printf("No such directory!\n");
-				closedir(d);
-				navigate(cd_pwd);
-				cd_pwd = getenv("PWD");
-			}
-			
-		//}
-	}
-	;
+	};
+
+list:
+	LS{
+		ls();
+	};
 	
-pathname:
-	WORD{
-		$<string>$ = $<string>1;
+bye:
+	BYE
+	{
+		printf("Exiting the shell now...\n");
+		exit(0);
 	};
 	
 print_enviro:
@@ -91,18 +133,44 @@ print_enviro:
 		printf("%s$ ",path);
 	}
 
-list:
-	LS{
-		ls();
-	};
+metacharacters:
+	lessthan
+	| greaterthan
+	| pipe
+	| doublequote
+	| backslash
+	| ampersand
+	;
 	
-bye:
-	BYE
-	{
-		printf("Exiting the shell now...\n");
-		exit(0);
+lessthan:
+	LESSTHAN{
+		printf("Less than\n");
 	};
 
+greaterthan:
+	GREATERTHAN{
+		printf("Greater than\n");
+	};
+	
+pipe:
+	PIPE{
+		printf("Pipe\n");
+	};
+	
+doublequote:
+	DOUBLEQUOTE{
+		printf("Double quote\n");
+	};
+	
+backslash:
+	BACKSLASH{
+		printf("Backslash\n");
+	};
+	
+ampersand:
+	AMPERSAND{
+		printf("Ampersand\n");
+	};
 %%
 #include <stdlib.h>
 #include <unistd.h>

@@ -1,7 +1,7 @@
-all: example1
+all: shell
 
-example1: y.tab.o lex.yy.o
-	cc lex.yy.o y.tab.o -o example1.out
+shell: y.tab.o lex.yy.o
+	cc lex.yy.o y.tab.o -o shell
 
 lex.yy.o: lex.yy.c
 	cc -c lex.yy.c
