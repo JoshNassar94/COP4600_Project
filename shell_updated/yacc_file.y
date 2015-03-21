@@ -226,7 +226,7 @@ void ls(){
 	}
 	else if(process == -1)		/* can't create a new process */
 	{
-		fprintf(stderr, "Can't fork!\n");
+		fprintf(stderr, "Can't fork! \n");
 		exit(2);
 	}
 }

@@ -9,8 +9,8 @@ lex.yy.o: lex.yy.c
 y.tab.o: y.tab.c
 	cc -c y.tab.c
 
-lex.yy.c: example1.l
-	lex example1.l
+lex.yy.c: lex_file.l
+	lex lex_file.l
 
-y.tab.c: example1.y
-	yacc -d example1.y
+y.tab.c: yacc_file.y
+	yacc -d yacc_file.y
