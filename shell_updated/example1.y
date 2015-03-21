@@ -31,6 +31,7 @@ command:
 	| command plain_word {printf("No such command as \"%s\"\n",$<string>2);}
 	| command change_dir_path
 	| command change_dir
+	| command list_dir
 	| command list
 	| command bye
 	| command print_enviro
@@ -40,7 +41,6 @@ command:
 plain_word:
 	WORD{
 		$<string>$ = $<string>1;
-		
 	};
 	
 change_dir_path: 
@@ -68,12 +68,12 @@ change_dir_path:
 			cd_pwd = getenv("PWD");
 		}
 	};
-	| frontslash_word
+	| cd_frontslash_word
 	| period
 	| metacharacters
 	;	
 	
-frontslash_word:
+cd_frontslash_word:
 	FRONTSLASH WORD{
 		cd_pwd = getenv("PWD");
 		navigate("");
@@ -109,10 +109,17 @@ change_dir:
 		cd_pwd = getenv("PWD");
 		navigate("");
 	};
-
+	
 list:
 	LS{
-		ls();
+		char* path = "";
+		ls(path);
+	};
+
+list_dir:
+	LS WORD{
+		char* path = $<string>2;
+		ls_path(path);
 	};
 	
 bye:
@@ -190,6 +197,23 @@ void ls(){
 	else if(process == 0)	/* child */
 	{
 		execlp("ls", "ls", "--color=auto",(char *) NULL );
+		exit(1);
+	}
+	else if(process == -1)		/* can't create a new process */
+	{
+		fprintf(stderr, "Can't fork!\n");
+		exit(2);
+	}
+}
+
+void ls_path(char* path){
+	int process;
+	process = fork();
+	if(process > 0)		/* parent */
+		wait((int*)0);
+	else if(process == 0)	/* child */
+	{
+		execlp("ls", "ls", "--color=auto", path, (char *) NULL );
 		exit(1);
 	}
 	else if(process == -1)		/* can't create a new process */
