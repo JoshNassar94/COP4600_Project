@@ -22,6 +22,7 @@ ls			return LS;
 bye			return BYE;
 printenv	return PRINT_ENV;
 setenv		return SET_ENV;
+unsetenv	return UNSET_ENV;
 \.\.		yylval.string=strdup(yytext); return WORD;
 [a-zA-Z][a-zA-Z0-9_()\.]*    yylval.string=strdup(yytext); return WORD;
 \n                      /* ignore end of line */;

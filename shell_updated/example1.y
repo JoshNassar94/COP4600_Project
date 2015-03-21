@@ -17,7 +17,7 @@ int yywrap()
 } 
   
 %}
-%token CD LS BYE NUMBER PRINT_ENV FRONTSLASH PERIOD LESSTHAN GREATERTHAN PIPE DOUBLEQUOTE BACKSLASH AMPERSAND SET_ENV
+%token CD LS BYE NUMBER PRINT_ENV FRONTSLASH PERIOD LESSTHAN GREATERTHAN PIPE DOUBLEQUOTE BACKSLASH AMPERSAND SET_ENV UNSET_ENV
 
 %union
 {
@@ -36,6 +36,7 @@ command:
 	| command bye
 	| command print_enviro
 	| command set_enviro
+	| command unset_enviro
 	| metacharacters
 	;
 	
@@ -150,6 +151,16 @@ set_enviro:
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
 	};
+	
+unset_enviro:
+	UNSET_ENV WORD
+	{
+		char* name = $<string>2;
+		if(getenv(name))
+			unsetenv(name);
+		else
+			printf("No variable named %s.\n", name);
+	};
 
 metacharacters:
 	lessthan
@@ -189,6 +200,9 @@ ampersand:
 	AMPERSAND{
 		printf("Ampersand\n");
 	};
+	
+	
+	
 %%
 #include <stdlib.h>
 #include <unistd.h>
