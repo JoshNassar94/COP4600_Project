@@ -17,7 +17,7 @@ int yywrap()
 } 
   
 %}
-%token CD LS BYE NUMBER PRINT_ENV FRONTSLASH PERIOD LESSTHAN GREATERTHAN PIPE DOUBLEQUOTE BACKSLASH AMPERSAND
+%token CD LS BYE NUMBER PRINT_ENV FRONTSLASH PERIOD LESSTHAN GREATERTHAN PIPE DOUBLEQUOTE BACKSLASH AMPERSAND SET_ENV
 
 %union
 {
@@ -35,6 +35,7 @@ command:
 	| command list
 	| command bye
 	| command print_enviro
+	| command set_enviro
 	| metacharacters
 	;
 	
@@ -139,6 +140,16 @@ print_enviro:
 		char* path = getenv("PATH");
 		printf("%s$ ",path);
 	}
+	
+set_enviro:
+	SET_ENV WORD WORD
+	{
+		char* envname = $<string>2;
+		char* envval = $<string>3;
+		int result = setenv(envname, envval, 1);
+		if(result == -1)
+			printf("Failed to set variable %s to %s.\n", envname, envval);
+	};
 
 metacharacters:
 	lessthan

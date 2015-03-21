@@ -9,18 +9,19 @@ Precedence Rules:
 %}
 %%
 [/]			return FRONTSLASH;
-[\\]			return BACKSLASH;
+[\\]		return BACKSLASH;
 [<]			return LESSTHAN;
 [>]			return GREATERTHAN;
 [|]			return PIPE;
 ["]			return DOUBLEQUOTE;
 [&]			return AMPERSAND;
 \.			return PERIOD;
-[0-9]+                  return NUMBER;
-cd                  return CD;
+[0-9]+		return NUMBER;
+cd          return CD;
 ls			return LS;
 bye			return BYE;
 printenv	return PRINT_ENV;
+setenv		return SET_ENV;
 \.\.		yylval.string=strdup(yytext); return WORD;
 [a-zA-Z][a-zA-Z0-9_()\.]*    yylval.string=strdup(yytext); return WORD;
 \n                      /* ignore end of line */;
