@@ -221,7 +221,7 @@ void ls(){
 		wait((int*)0);
 	else if(process == 0)	/* child */
 	{
-		execlp("ls", "ls", "--color=auto",(char *) NULL );
+		execl("/bin/ls", "ls", "--color=auto",(char *) NULL );
 		exit(1);
 	}
 	else if(process == -1)		/* can't create a new process */
@@ -238,7 +238,7 @@ void ls_path(char* path){
 		wait((int*)0);
 	else if(process == 0)	/* child */
 	{
-		execlp("ls", "ls", "--color=auto", path, (char *) NULL );
+		execl("/bin/ls", "ls", "--color=auto", path, (char *) NULL );
 		exit(1);
 	}
 	else if(process == -1)		/* can't create a new process */
