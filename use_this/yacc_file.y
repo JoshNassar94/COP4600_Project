@@ -56,7 +56,7 @@ command:
 	| alias NEW_LINE
 	| unalias NEW_LINE
 	;
-	
+
 change_dir:
 	CD{chdir(getenv("HOME"));}
 	| CD WORD{chdir($2);};
@@ -129,7 +129,7 @@ cmd:
 
 			if(pid == 0){
 				//This function is defined in user_created_commands.c
-				execute_externel_command($1);
+				execute_externel_command($1, alias_list);
 			}else{
 				free_linked_list($1);
 				waitpid(pid, &status, 0);
@@ -137,7 +137,7 @@ cmd:
 		}	
 		;
 arg_list:
-		arg{ linked_list* ll = create_linked_list();
+		arg{linked_list* ll = create_linked_list();
 			push_linked_list(ll,$1);
 			$$=ll;}
 		|
@@ -146,4 +146,3 @@ arg_list:
 arg: WORD{$$=$1;}
 	
 %%
-
