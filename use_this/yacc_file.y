@@ -3,11 +3,12 @@
 #include <string.h>
 #include "dev/data_structures/data_structures.h"
 #include "dev/user_created_commands.h"
+#include <stdlib.h>
 
 extern FILE *yyin;
 extern FILE *yyout;
 char* cd_pwd;
-
+linked_list* alias_list;
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
@@ -18,8 +19,17 @@ int yywrap()
         return 1;
 } 
   
+int main()
+{
+	alias_list = create_linked_list();
+	printf("-------Welcome to the Shell-------\n");
+	printf("%s","$ ");
+	yyparse();
+	return 0;
+} 
+
 %}
-%token CD BYE NUMBER PRINT_ENV SET_ENV UNSET_ENV NEW_LINE
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS
 
 %union
 {
@@ -27,7 +37,7 @@ int yywrap()
         char* string;
         void* linkedlist;
 }
-%left CD WORD
+%left CD ALIAS WORD
 %token <string> WORD
 %type <linkedlist> arg_list
 %type <string> arg
@@ -43,6 +53,8 @@ command:
 	| set_enviro NEW_LINE
 	| unset_enviro NEW_LINE
 	| cmd NEW_LINE
+	| alias NEW_LINE
+	| unalias NEW_LINE
 	;
 	
 change_dir:
@@ -86,6 +98,22 @@ unset_enviro:
 			printf("No variable named %s.\n", name);
 	};
 	
+alias:
+	ALIAS
+	{
+		print_alias_linked_list(alias_list);
+	}
+	| ALIAS WORD WORD
+	{
+		push_alias_linked_list(alias_list, $2, $3);
+	};
+	
+unalias:
+	UNALIAS WORD
+	{
+		remove_alias_linked_list(alias_list, $2);
+	};
+	
 /********************************************************************************************
  *
  *The following section, cmd, arg_list, and arg describe the functionality of "other commands"
@@ -118,12 +146,4 @@ arg_list:
 arg: WORD{$$=$1;}
 	
 %%
-#include <stdlib.h>
 
-int main()
-{
-	printf("-------Welcome to the Shell-------\n");
-	printf("%s","$ ");
-	yyparse();
-	return 0;
-} 

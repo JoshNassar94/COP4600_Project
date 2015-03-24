@@ -8,12 +8,13 @@ Precedence Rules:
 #include "y.tab.h"
 %}
 %%
-[0-9]+		return NUMBER;
 cd          return CD;
 bye			return BYE;
 printenv	return PRINT_ENV;
 setenv		return SET_ENV;
 unsetenv	return UNSET_ENV;
+alias		return ALIAS;
+unalias		return UNALIAS;
 [a-zA-Z0-9\/.-]+    yylval.string=strdup(yytext); return WORD;
 \n          return NEW_LINE;       
 [ \t]+                  /* ignore whitespace */;

@@ -2,6 +2,7 @@
 #define DATA_STRUCTURES_H
 typedef struct node{
 	char * data;
+	char * alias_name;
 	struct node * next;
 } node;
 
