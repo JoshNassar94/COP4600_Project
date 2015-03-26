@@ -5,10 +5,17 @@
 #include "dev/user_created_commands.h"
 #include <stdlib.h>
 
+#define HOME getenv("HOME")
+#define PWD getenv("PWD")
+#define copystring(a,b) strcpy((a=(char *)malloc(strlen(b)+1)),b)
+
 extern FILE *yyin;
 extern FILE *yyout;
 char* cd_pwd;
 linked_list* alias_list;
+
+
+
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
@@ -22,11 +29,61 @@ int yywrap()
 int main()
 {
 	alias_list = create_linked_list();
-	printf("-------Welcome to the Shell-------\n");
-	printf("%s","$ ");
+	printf("**********************************\n");
+	printf("*--------------------------------*\n");
+	printf("*------Welcome to the Shell------*\n");
+	printf("*--------------------------------*\n");
+	printf("**********************************\n");
+	printf("%s$ ",PWD);
 	yyparse();
 	return 0;
 } 
+
+char *replace(char *str, char *orig, char * rep)
+{
+	static char buffer[4096];
+	char *p;
+	if(!(p = strstr(str, orig))) return str; //is orig actually in str
+	
+	strncpy(buffer, str, p-str); //copy char from str start to orig into buffer
+	buffer[p-str] = '\0';
+	
+	sprintf(buffer+(p-str), "%s%s", rep, p+strlen(orig));
+	
+	return buffer;
+}
+
+char * insert_env(char* input)
+{
+	char * s = input;
+	int i;
+	int valid_so_far = 0;
+	int start;
+	int end;
+	for (i = 0; i < strlen(s); i++)
+	{
+		if(s[i] == '$') start = i;
+		if(s[i] == '{' && i == start+1) valid_so_far = 1;
+		if(s[i] == '}' && valid_so_far)
+		{
+			char subbuf[4096];
+			memcpy(subbuf, &s[start], i-start+1);
+			subbuf[i-start+1] = '\0';
+			
+			char * var;
+			copystring(var, subbuf);
+			var = var + 2; 				//get rid of ${
+			var[i-start-2] = '\0';  		//get rid of ending }
+			
+			s = replace(s, subbuf, getenv(var));
+		}
+	
+	}
+	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
+
+	return s;
+}
+
 
 %}
 %token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS
@@ -43,7 +100,11 @@ int main()
 %type <string> arg
 %%
 commands:
-		| commands command{printf("%s","$ ");};
+		| commands command
+		{
+			
+			printf("%s$ ",getenv("PWD"));
+		};
 
 command:
 	| '\n'
@@ -58,8 +119,15 @@ command:
 	;
 
 change_dir:
-	CD{chdir(getenv("HOME"));}
-	| CD WORD{chdir($2);};
+	CD
+	{
+		chdir(getenv("HOME"));
+	}
+	| CD WORD
+	{
+		$2 = insert_env($2);
+		chdir($2);
+	};
 	
 bye:
 	BYE
@@ -81,8 +149,8 @@ print_enviro:
 set_enviro:
 	SET_ENV WORD WORD
 	{
-		char* envname = $<string>2;
-		char* envval = $<string>3;
+		char* envname = insert_env($<string>2);
+		char* envval = insert_env($<string>3);
 		int result = setenv(envname, envval, 1);
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
@@ -137,11 +205,19 @@ cmd:
 		}	
 		;
 arg_list:
-		arg{linked_list* ll = create_linked_list();
+		arg
+		{
+			
+			linked_list* ll = create_linked_list();
 			push_linked_list(ll,$1);
-			$$=ll;}
+			$$=ll;
+		}
 		|
-		arg_list arg{push_linked_list($1,$2); $$ = $1;}
+		arg_list arg
+		{
+			$2 = insert_env($2);		//change all instances of ${ENV} to the coresponding variable
+			push_linked_list($1,$2); $$ = $1;
+		}
 	
 arg: WORD{$$=$1;}
 	
