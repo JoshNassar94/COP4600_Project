@@ -9,5 +9,7 @@ void execute_alias_command(char*, linked_list *);
 //Executes a command defined outside of bash given a linked list. The first element of the linked list is the command and the elements that follow it are parameters to that command.
 void execute_externel_command(linked_list *, linked_list *);
 
+void check_alias_list(linked_list*, char*, char*);
 
+const char* use_env_var(char*);
 #endif

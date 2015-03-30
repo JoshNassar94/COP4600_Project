@@ -80,13 +80,12 @@ char * insert_env(char* input)
 	
 	}
 	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
-
 	return s;
 }
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS BAD
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS
 
 %union
 {
@@ -116,7 +115,6 @@ command:
 	| cmd NEW_LINE
 	| alias NEW_LINE
 	| unalias NEW_LINE
-	| bad NEW_LINE
 	;
 
 change_dir:
@@ -185,12 +183,6 @@ unalias:
 	UNALIAS WORD
 	{
 		remove_alias_linked_list(alias_list, $2);
-	};
-	
-bad:
-	BAD
-	{
-		printf("Incorrect syntax\n");
 	};
 
 cmd:

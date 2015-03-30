@@ -6,6 +6,8 @@
 #include "user_created_commands.h"
 #include "data_structures/data_structures.h"
 
+#define copystring(a,b) strcpy((a=(char *)malloc(strlen(b)+1)),b)
+
 void execute_externel_command(linked_list * linkedlist, linked_list * alias_list){
 	char * command;
 	char ** arguments;
@@ -126,20 +128,22 @@ void execute_alias_command(char* word, linked_list * alias_list){
 	
 	char* args;
 	linked_list* ll = create_linked_list();
-	strcpy((args=(char *)malloc(strlen(current_node->data)+1)),current_node->data);
-
+	copystring(args, current_node->data);
+	
 	if(args[0] == '"'){
 		int i;
 		int length = strlen(args);
-		char new_args[length-2];
+		char new_args[length-1];
 		for(i = 0; i < length-2; ++i){
 			new_args[i] = args[i+1];
 		}
+		new_args[length-2] = '\0';
 		char* tok;
 		const char delim[2] = " ";
 		tok = strtok(new_args, delim);
 		while(tok != NULL){
-			push_linked_list(ll,tok);
+			char* test = use_env_var(tok);
+			push_linked_list(ll,test);
 			tok = strtok(NULL, delim);
 		}
 		execute_externel_command(ll, alias_list);
@@ -149,7 +153,7 @@ void execute_alias_command(char* word, linked_list * alias_list){
 		execute_externel_command(ll, alias_list);
 	}
 }
-
+ 
 void check_alias_list(linked_list* alias_list, char* name, char* cmd){
 	if(find_alias_linked_list(alias_list, name) == 1){
 		printf("Replaced the already existing alias\n");
@@ -158,4 +162,31 @@ void check_alias_list(linked_list* alias_list, char* name, char* cmd){
 	else
 		push_alias_linked_list(alias_list, name, cmd);
 	
+}
+
+const char* use_env_var(char* tok){
+	char * ret = tok;
+	int i;
+	int valid_so_far = 0;
+	int start;
+	int end;
+	for (i = 0; i < strlen(ret); i++)
+	{
+		if(ret[i] == '$') start = i;
+		if(ret[i] == '{' && i == start+1) valid_so_far = 1;
+		if(ret[i] == '}' && valid_so_far)
+		{
+			char subbuf[4096];
+			memcpy(subbuf, &ret[start], i-start+1);
+			subbuf[i-start+1] = '\0';
+			
+			char * var;
+			copystring(var, subbuf);
+			var = var + 2; 				//get rid of ${
+			var[i-start-2] = '\0';  		//get rid of ending }
+			
+			ret = replace(ret, subbuf, getenv(var));
+		}
+	}
+	return ret;
 }
