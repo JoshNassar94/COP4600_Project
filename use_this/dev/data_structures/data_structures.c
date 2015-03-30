@@ -54,7 +54,6 @@ void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 void print_linked_list(linked_list * linkedlist){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
-		puts("There are currently no aliases!");
 		return;
 	}
 	while(current_node->next !=NULL){

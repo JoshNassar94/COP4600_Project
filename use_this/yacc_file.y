@@ -128,7 +128,7 @@ change_dir:
 	{
 		$2 = insert_env($2);
 		chdir($2);
-		char pwd[1024];
+		char pwd[4096];
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
 	};
@@ -185,13 +185,6 @@ unalias:
 	{
 		remove_alias_linked_list(alias_list, $2);
 	};
-	
-/********************************************************************************************
- *
- *The following section, cmd, arg_list, and arg describe the functionality of "other commands"
- *(commands defined outside of the shell) ex: /bin/ls -l
- *
- ********************************************************************************************/
 
 cmd:
 		arg_list
@@ -200,7 +193,6 @@ cmd:
 			pid_t pid = fork();
 
 			if(pid == 0){
-				//This function is defined in user_created_commands.c
 				execute_externel_command($1, alias_list);
 			}else{
 				free_linked_list($1);
@@ -219,7 +211,7 @@ arg_list:
 		|
 		arg_list arg
 		{
-			$2 = insert_env($2);		//change all instances of ${ENV} to the coresponding variable
+			$2 = insert_env($2);
 			push_linked_list($1,$2); $$ = $1;
 		}
 	

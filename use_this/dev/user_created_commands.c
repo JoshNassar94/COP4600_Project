@@ -43,7 +43,6 @@ void execute_externel_command(linked_list * linkedlist, linked_list * alias_list
 			return;
 		}
 		else{
-			puts(command);
 			if(execve(path, arguments, envp)<0){
 				puts("execve has failed");
 			}
@@ -51,7 +50,6 @@ void execute_externel_command(linked_list * linkedlist, linked_list * alias_list
 		}
 	}
 	else{
-		puts(command);
 		if(execve(command, arguments, envp)<0){
 			puts("execve has failed");
 		}
@@ -112,7 +110,7 @@ int is_alias(char* word, linked_list * list){
 	}
 	
 	for(current_node; current_node->next != NULL; current_node=current_node->next){
-		if(strcmp(word, current_node->alias_name) == 0){
+		if(strcmp(word, current_node->next->alias_name) == 0){
 			return 1;
 		}
 	}
@@ -125,15 +123,29 @@ void execute_alias_command(char* word, linked_list * alias_list){
 	{
 		current_node=current_node->next;
 	}
-	char* tok;
-	char* args = current_node->data;
-	printf("%s\n", args);
-	tok = strtok(args, " ");
-	linked_list* ll = create_linked_list();
-	while(tok!= NULL){
-		push_linked_list(ll,tok);
-		tok = strtok(NULL, " ");
-	}
 	
-	execute_externel_command(ll, alias_list);
+	char* args;
+	linked_list* ll = create_linked_list();
+	strcpy((args=(char *)malloc(strlen(current_node->data)+1)),current_node->data);
+
+	if(args[0] == '"'){
+		int i;
+		int length = strlen(args);
+		char new_args[length-2];
+		for(i = 0; i < length-2; ++i){
+			new_args[i] = args[i+1];
+		}
+		char* tok;
+		const char delim[2] = " ";
+		tok = strtok(new_args, delim);
+		while(tok != NULL){
+			push_linked_list(ll,tok);
+			tok = strtok(NULL, delim);
+		}
+		execute_externel_command(ll, alias_list);
+	} 
+	else{
+		push_linked_list(ll,args);
+		execute_externel_command(ll, alias_list);
+	}
 }
