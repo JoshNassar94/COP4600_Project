@@ -106,7 +106,7 @@ commands:
 		};
 
 command:
-	| '\n'
+	| NEW_LINE {/* do nothing */ }
 	| change_dir NEW_LINE
 	| bye NEW_LINE
 	| print_enviro NEW_LINE
