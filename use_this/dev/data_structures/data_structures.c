@@ -97,3 +97,31 @@ void remove_alias_linked_list(linked_list * linkedlist, char * name){
 	}
 	puts("That alias does not exist");
 }
+
+int find_alias_linked_list(linked_list * linkedlist, char* name){
+	if(linkedlist->start == NULL){
+		return 0;
+	}
+	node * current_node = linkedlist->start;
+	if(strcmp(current_node->alias_name, name) == 0){
+		return 1;
+	}
+	while(current_node->next != NULL){
+		if(strcmp(current_node->next->alias_name, name) == 0)
+			return 1;
+	}
+	return 0;
+}
+
+void replace_value_alias_linked_list(linked_list * linkedlist, char* name, char* cmd){
+	node * current_node = linkedlist->start;
+	if(strcmp(current_node->alias_name, name) == 0){
+		current_node->data = cmd;
+		return;
+	}
+	while(current_node->next != NULL){
+		if(strcmp(current_node->next->alias_name, name) == 0)
+			current_node->next->data = cmd;
+			return;
+	}
+}

@@ -86,7 +86,7 @@ char * insert_env(char* input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS BAD
 
 %union
 {
@@ -116,6 +116,7 @@ command:
 	| cmd NEW_LINE
 	| alias NEW_LINE
 	| unalias NEW_LINE
+	| bad NEW_LINE
 	;
 
 change_dir:
@@ -177,13 +178,19 @@ alias:
 	}
 	| ALIAS WORD WORD
 	{
-		push_alias_linked_list(alias_list, $2, $3);
+		check_alias_list(alias_list, $2, $3);
 	};
 	
 unalias:
 	UNALIAS WORD
 	{
 		remove_alias_linked_list(alias_list, $2);
+	};
+	
+bad:
+	BAD
+	{
+		printf("Incorrect syntax\n");
 	};
 
 cmd:
