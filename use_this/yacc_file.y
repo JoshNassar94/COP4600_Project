@@ -122,11 +122,15 @@ change_dir:
 	CD
 	{
 		chdir(getenv("HOME"));
+		setenv("PWD", getenv("HOME"), 1);
 	}
 	| CD WORD
 	{
 		$2 = insert_env($2);
 		chdir($2);
+		char pwd[1024];
+		getcwd(pwd, sizeof(pwd));
+		setenv("PWD", pwd, 1);
 	};
 	
 bye:
