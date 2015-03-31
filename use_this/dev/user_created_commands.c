@@ -16,7 +16,8 @@ void resolve_output(command_node * cn)
 	if (cn->out_file)
 	{	
 		int fd;
-		fd = open(cn->out_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE);
+		if (cn->append) fd = open(cn->out_file, O_WRONLY | O_APPEND | O_CREAT , S_IREAD | S_IWRITE);
+		else fd = open(cn->out_file, O_WRONLY | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
 		if (fd == -1)
 		{
 			perror("error: in user_created_commands.c");

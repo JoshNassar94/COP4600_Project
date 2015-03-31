@@ -199,9 +199,15 @@ full_cmd:
 		}
 	}
 cmd:
+		cmd GTGT WORD
+		{
+			command_node * cn = $1;
+			cn->out_file = $3;
+			cn->append = 1;
+		}
+		|
 		cmd GT WORD
 		{
-			printf("DEBUG: output redir %s\n", $3);
 			command_node * cn = $1;
 			cn->out_file = $3;
 		}

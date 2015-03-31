@@ -105,6 +105,7 @@ command_node * create_command_node(){
 	commandNode->next = NULL;
 	commandNode->out_file = NULL;
 	commandNode->in_file = NULL;
+	commandNode->append = 0;
 	
 	return commandNode;
 }

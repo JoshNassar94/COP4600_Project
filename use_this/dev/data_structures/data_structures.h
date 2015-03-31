@@ -32,6 +32,7 @@ typedef struct command_node{
 	char * in_file;
 	char * out_file;
 	char * err_file;
+	int append;
 } command_node;
 
 //creates an instance of a command_node
