@@ -80,7 +80,6 @@ char * insert_env(char* input)
 	
 	}
 	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
-
 	return s;
 }
 
@@ -107,7 +106,7 @@ commands:
 		};
 
 command:
-	| '\n'
+	| NEW_LINE {/* do nothing */ }
 	| change_dir NEW_LINE
 	| bye NEW_LINE
 	| print_enviro NEW_LINE
@@ -122,11 +121,15 @@ change_dir:
 	CD
 	{
 		chdir(getenv("HOME"));
+		setenv("PWD", getenv("HOME"), 1);
 	}
 	| CD WORD
 	{
 		$2 = insert_env($2);
 		chdir($2);
+		char pwd[4096];
+		getcwd(pwd, sizeof(pwd));
+		setenv("PWD", pwd, 1);
 	};
 	
 bye:
@@ -173,7 +176,7 @@ alias:
 	}
 	| ALIAS WORD WORD
 	{
-		push_alias_linked_list(alias_list, $2, $3);
+		check_alias_list(alias_list, $2, $3);
 	};
 	
 unalias:
@@ -181,13 +184,6 @@ unalias:
 	{
 		remove_alias_linked_list(alias_list, $2);
 	};
-	
-/********************************************************************************************
- *
- *The following section, cmd, arg_list, and arg describe the functionality of "other commands"
- *(commands defined outside of the shell) ex: /bin/ls -l
- *
- ********************************************************************************************/
 
 cmd:
 		arg_list
