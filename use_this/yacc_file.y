@@ -193,12 +193,19 @@ full_cmd:
 		if(pid == 0){	//this means in child
 			//This function is defined in user_created_commands.c
 			execute_externel_command($1, alias_list);
+			exit(0);
 		}else{			//in parent
 			free_linked_list($1);
 			waitpid(pid, &status, 0);
 		}
 	}
 cmd:
+		cmd LT WORD
+		{
+			command_node * cn = $1;
+			cn->in_file = $3;
+		}
+		|
 		cmd GTGT WORD
 		{
 			command_node * cn = $1;

@@ -10,6 +10,30 @@
 #include "data_structures/data_structures.h"
 
 #define copystring(a,b) strcpy((a=(char *)malloc(strlen(b)+1)),b)
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
+void resolve_input(command_node * cn)
+{
+	if (cn->in_file)
+	{
+		int fd;
+		fd = open(cn->in_file, O_RDONLY);
+		if (fd == -1)
+		{
+			perror("error: could not open file");
+			exit(1);
+		}
+		close(STDIN_FILENO);
+		dup(fd);
+		close(fd);
+	}
+	else
+	{
+
+	}
+}
 
 void resolve_output(command_node * cn)
 {
@@ -23,17 +47,17 @@ void resolve_output(command_node * cn)
 			perror("error: in user_created_commands.c");
 			exit (1);
 		}
-		close(1);
+		close(STDOUT_FILENO);
 		dup(fd);
 		close(fd);
 	}
 	else
 	{
-		perror("WE ARE HERE");
+		/*perror("WE ARE HERE");
 		int fd;
 		fd = open("/dev/tty", O_WRONLY);
 		close(1);
-		dup(fd);
+		dup(fd);*/
 	}
 }
 
@@ -43,6 +67,8 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	char ** envp = {NULL};
 	//char * envp = getenv("PATH");
 	
+	//these two commands will be moved for pipes
+	resolve_input(commandNode);
 	resolve_output(commandNode);
 	
 	linked_list * linkedlist = commandNode->cmd;
