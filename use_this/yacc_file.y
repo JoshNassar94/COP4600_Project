@@ -85,7 +85,7 @@ char * insert_env(char* input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND GT GTGT LT
 
 %union
 {
@@ -96,6 +96,7 @@ char * insert_env(char* input)
 %left CD ALIAS WORD
 %token <string> WORD
 %type <linkedlist> arg_list
+%type <linkedlist> cmd
 %type <string> arg
 %%
 commands:
@@ -112,7 +113,7 @@ command:
 	| print_enviro NEW_LINE
 	| set_enviro NEW_LINE
 	| unset_enviro NEW_LINE
-	| cmd NEW_LINE
+	| full_cmd NEW_LINE
 	| alias NEW_LINE
 	| unalias NEW_LINE
 	;
@@ -183,22 +184,33 @@ unalias:
 	UNALIAS WORD
 	{
 		remove_alias_linked_list(alias_list, $2);
-	};
+	};		
+full_cmd:
+	cmd
+	{
+		printf("DEBUG: executing FULL command\n");
+		int status;
+		pid_t pid = fork();			//this is going to need to be inside execute_external 
 
+		if(pid == 0){	//this means in child
+			//This function is defined in user_created_commands.c
+			execute_externel_command($1, alias_list);
+		}else{			//in parent
+			free_linked_list($1);
+			waitpid(pid, &status, 0);
+		}
+	}
 cmd:
+		cmd GT WORD
+		{
+			printf("DEBUG: output redir %s\n", $3);
+		}
+		|
 		arg_list
 		{
-			int status;
-			pid_t pid = fork();
-
-			if(pid == 0){	//this means in child
-				//This function is defined in user_created_commands.c
-				execute_externel_command($1, alias_list);
-			}else{			//in parent
-				free_linked_list($1);
-				waitpid(pid, &status, 0);
-			}
-		}	
+			$$ = $1;
+		}
+			
 		;
 
 arg_list:
