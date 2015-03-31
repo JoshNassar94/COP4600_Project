@@ -2,17 +2,47 @@
 #include <stdlib.h>
 #include <dirent.h> 
 #include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "user_created_commands.h"
 #include "data_structures/data_structures.h"
 
 #define copystring(a,b) strcpy((a=(char *)malloc(strlen(b)+1)),b)
 
+void resolve_output(command_node * cn)
+{
+	if (cn->out_file)
+	{	
+		int fd;
+		fd = open(cn->out_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE);
+		if (fd == -1)
+		{
+			perror("error: in user_created_commands.c");
+			exit (1);
+		}
+		close(1);
+		dup(fd);
+		close(fd);
+	}
+	else
+	{
+		perror("WE ARE HERE");
+		int fd;
+		fd = open("/dev/tty", O_WRONLY);
+		close(1);
+		dup(fd);
+	}
+}
+
 void execute_externel_command(command_node * commandNode, linked_list * alias_list){
 	char * command;
 	char ** arguments;
 	char ** envp = {NULL};
 	//char * envp = getenv("PATH");
+	
+	resolve_output(commandNode);
 	
 	linked_list * linkedlist = commandNode->cmd;
 

@@ -102,7 +102,10 @@ void remove_alias_linked_list(linked_list * linkedlist, char * name){
 command_node * create_command_node(){
 	command_node * commandNode = malloc(sizeof(command_node));
 	commandNode->cmd = create_linked_list();
-	command_node * next = NULL;
+	commandNode->next = NULL;
+	commandNode->out_file = NULL;
+	commandNode->in_file = NULL;
+	
 	return commandNode;
 }
 
