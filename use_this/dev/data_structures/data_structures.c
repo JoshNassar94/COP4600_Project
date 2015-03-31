@@ -98,3 +98,10 @@ void remove_alias_linked_list(linked_list * linkedlist, char * name){
 	}
 	puts("That alias does not exist");
 }
+
+command_node * create_command_node(){
+	command_node * commandNode = malloc(sizeof(command_node));
+	commandNode->cmd = create_linked_list();
+	command_node * next = NULL;
+	return commandNode;
+}

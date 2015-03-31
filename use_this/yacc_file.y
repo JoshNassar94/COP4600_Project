@@ -86,7 +86,7 @@ char * insert_env(char* input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND
 
 %union
 {
@@ -195,28 +195,31 @@ cmd:
 			int status;
 			pid_t pid = fork();
 
-			if(pid == 0){
+			if(pid == 0){	//this means in child
 				//This function is defined in user_created_commands.c
 				execute_externel_command($1, alias_list);
-			}else{
+			}else{			//in parent
 				free_linked_list($1);
 				waitpid(pid, &status, 0);
 			}
 		}	
 		;
+
 arg_list:
 		arg
 		{
-			
-			linked_list* ll = create_linked_list();
-			push_linked_list(ll,$1);
-			$$=ll;
+			command_node * cn = create_command_node();
+			//linked_list* ll = create_linked_list();
+			push_linked_list(cn->cmd,$1);
+			$$=cn;
 		}
 		|
 		arg_list arg
 		{
 			$2 = insert_env($2);		//change all instances of ${ENV} to the coresponding variable
-			push_linked_list($1,$2); $$ = $1;
+			command_node * cn = $1;
+			push_linked_list(cn->cmd,$2); 
+			$$ = $1;
 		}
 	
 arg: WORD{$$=$1;}

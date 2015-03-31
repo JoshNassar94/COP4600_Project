@@ -15,6 +15,7 @@ setenv				return SET_ENV;
 unsetenv			return UNSET_ENV;
 alias				return ALIAS;
 unalias				return UNALIAS;
+&				return AMPERSAND;
 \"[ a-zA-Z0-9\/.-]+\"		yylval.string=strdup(yytext); return WORD;
 ["$"\{\}~a-zA-Z0-9\/.-]+   		yylval.string=strdup(yytext); return WORD;
 \n          			return NEW_LINE;       

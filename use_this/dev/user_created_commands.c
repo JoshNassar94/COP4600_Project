@@ -6,17 +6,17 @@
 #include "user_created_commands.h"
 #include "data_structures/data_structures.h"
 
-void execute_externel_command(linked_list * linkedlist, linked_list * alias_list){
+void execute_externel_command(command_node * commandNode, linked_list * alias_list){
 	char * command;
 	char ** arguments;
 	char ** envp = {NULL};
 	//char * envp = getenv("PATH");
 	
+	linked_list * linkedlist = commandNode->cmd;
 
 	//count the number of elements in the linked list so we know how much memory to allocate for the array;
 	int list_element_count=1;
 	node * current_node;
-	
 	for(current_node = linkedlist->start; current_node->next != NULL; current_node=current_node->next){
 		list_element_count++;
 	}
@@ -129,11 +129,14 @@ void execute_alias_command(char* word, linked_list * alias_list){
 	char* args = current_node->data;
 	printf("%s\n", args);
 	tok = strtok(args, " ");
-	linked_list* ll = create_linked_list();
+
+	//I changed this here, so if errors check here
+	command_node * cn = create_command_node();
+
 	while(tok!= NULL){
-		push_linked_list(ll,tok);
+		push_linked_list(cn->cmd,tok);
 		tok = strtok(NULL, " ");
 	}
 	
-	execute_externel_command(ll, alias_list);
+	execute_externel_command(cn, alias_list);
 }
