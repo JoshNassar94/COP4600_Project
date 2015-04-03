@@ -198,7 +198,10 @@ void execute_alias_command(char* word, linked_list * alias_list){
 		}
 		new_args[length-2] = '\0';
 		retokenize(new_args);
+		return;
 	}
+	retokenize(args);
+	return;
 }
  
 void check_alias_list(linked_list* alias_list, char* name, char* cmd){
