@@ -14,12 +14,12 @@
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
-void resolve_input(command_node * cn)
+void resolve_input(char* in_file)
 {
-	if (cn->in_file)
+	if (in_file)
 	{
 		int fd;
-		fd = open(cn->in_file, O_RDONLY);
+		fd = open(in_file, O_RDONLY);
 		if (fd == -1)
 		{
 			perror("error: could not open file");
@@ -35,13 +35,13 @@ void resolve_input(command_node * cn)
 	}
 }
 
-void resolve_output(command_node * cn)
+void resolve_output(char* out_file, int append)
 {
-	if (cn->out_file)
+	if (out_file)
 	{	
 		int fd;
-		if (cn->append) fd = open(cn->out_file, O_WRONLY | O_APPEND | O_CREAT , S_IREAD | S_IWRITE);
-		else fd = open(cn->out_file, O_WRONLY | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
+		if (append) fd = open(out_file, O_WRONLY | O_APPEND | O_CREAT , S_IREAD | S_IWRITE);
+		else fd = open(out_file, O_WRONLY | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
 		if (fd == -1)
 		{
 			perror("error: in user_created_commands.c");
@@ -68,8 +68,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	//char * envp = getenv("PATH");
 	
 	//these two commands will be moved for pipes
-	resolve_input(commandNode);
-	resolve_output(commandNode);
+
 	
 	linked_list * linkedlist = commandNode->cmd;
 

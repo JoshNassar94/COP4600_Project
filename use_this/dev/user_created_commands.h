@@ -4,7 +4,9 @@
 
 int is_alias(char*, linked_list *);
 
-void resolve_output(command_node*);
+void resolve_output(char*, int);
+
+void resolve_input(char*);
 
 void execute_alias_command(char*, linked_list *);
 

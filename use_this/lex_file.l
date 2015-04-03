@@ -19,6 +19,7 @@ unalias				return UNALIAS;
 \<				return LT;
 \>\>				return GTGT;
 \>				return GT;
+\|				return PIPE;
 \"[ a-zA-Z0-9\/\-\<\>&.]+\"		yylval.string=strdup(yytext); return WORD;
 ["$"\{\}~a-zA-Z0-9\/.\-]+   	yylval.string=strdup(yytext); return WORD;
 

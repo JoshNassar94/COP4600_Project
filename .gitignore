@@ -1,4 +1,4 @@
-shell
+use_this/shell
 # Object files
 *.o
 *.ko
