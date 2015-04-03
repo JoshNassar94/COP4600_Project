@@ -197,6 +197,8 @@ void execute_alias_command(char* word, linked_list * alias_list){
 			new_args[i] = args[i+1];
 		}
 		new_args[length-2] = '\0';
+		getCommand(new_args);
+		/*
 		char* tok;
 		const char delim[2] = " ";
 		tok = strtok(new_args, delim);
@@ -210,6 +212,8 @@ void execute_alias_command(char* word, linked_list * alias_list){
 	else{
 		push_linked_list(ll,args);
 		execute_externel_command(cn, alias_list);
+	}
+	*/
 	}
 }
  
@@ -249,3 +253,5 @@ const char* use_env_var(char* tok){
 	}
 	return ret;
 }
+
+

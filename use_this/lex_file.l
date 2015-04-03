@@ -19,11 +19,23 @@ unalias				return UNALIAS;
 \<				return LT;
 \>\>				return GTGT;
 \>				return GT;
-\"[ a-zA-Z0-9\/.-]+\"		yylval.string=strdup(yytext); return WORD;
-["$"\{\}~a-zA-Z0-9\/.-]+   	yylval.string=strdup(yytext); return WORD;
+\"[ a-zA-Z0-9\/\-\<\>&.]+\"		yylval.string=strdup(yytext); return WORD;
+["$"\{\}~a-zA-Z0-9\/.\-]+   	yylval.string=strdup(yytext); return WORD;
 
 \n          			return NEW_LINE;       
 [ \t]+                  /* ignore whitespace */;
 %%
 
 
+void getCommand(char* str){
+	const int length = strlen(str);
+	char buf[length+1];
+	strcpy(buf, str);
+	strcat(buf, "\n");
+	
+	yy_switch_to_buffer(yy_scan_string(buf));
+    if(yyparse())
+		printf("ERROR IN PARSING THE INPUT\n");
+	else
+		printf("DONE\n");
+}

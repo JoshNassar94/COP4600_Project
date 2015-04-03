@@ -32,8 +32,10 @@ int main()
 	printf("*------Welcome to the Shell------*\n");
 	printf("*--------------------------------*\n");
 	printf("**********************************\n");
-	printf("%s$ ",PWD);
-	yyparse();
+	while(1){
+		printf("%s$ ",PWD);
+		yyparse();
+	}
 	return 0;
 } 
 
@@ -246,3 +248,4 @@ arg_list:
 arg: WORD{$$=$1;}
 	
 %%
+
