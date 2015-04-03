@@ -197,23 +197,7 @@ void execute_alias_command(char* word, linked_list * alias_list){
 			new_args[i] = args[i+1];
 		}
 		new_args[length-2] = '\0';
-		getCommand(new_args);
-		/*
-		char* tok;
-		const char delim[2] = " ";
-		tok = strtok(new_args, delim);
-		while(tok != NULL){
-			char* test = use_env_var(tok);
-			push_linked_list(ll,test);
-			tok = strtok(NULL, delim);
-		}
-		execute_externel_command(cn, alias_list);
-	} 
-	else{
-		push_linked_list(ll,args);
-		execute_externel_command(cn, alias_list);
-	}
-	*/
+		retokenize(new_args);
 	}
 }
  

@@ -27,7 +27,7 @@ unalias				return UNALIAS;
 %%
 
 
-void getCommand(char* str){
+void retokenize(char* str){
 	const int length = strlen(str);
 	char buf[length+1];
 	strcpy(buf, str);
