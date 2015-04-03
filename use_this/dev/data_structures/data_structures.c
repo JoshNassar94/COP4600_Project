@@ -103,9 +103,7 @@ command_node * create_command_node(){
 	command_node * commandNode = malloc(sizeof(command_node));
 	commandNode->cmd = create_linked_list();
 	commandNode->next = NULL;
-	commandNode->out_file = NULL;
-	commandNode->in_file = NULL;
-	commandNode->append = 0;
+	commandNode->index = -1;
 	
 	return commandNode;
 }

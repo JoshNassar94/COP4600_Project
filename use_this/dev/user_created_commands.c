@@ -67,9 +67,6 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	char ** envp = {NULL};
 	//char * envp = getenv("PATH");
 	
-	//these two commands will be moved for pipes
-
-	
 	linked_list * linkedlist = commandNode->cmd;
 
 	//count the number of elements in the linked list so we know how much memory to allocate for the array;
@@ -78,7 +75,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	for(current_node = linkedlist->start; current_node->next != NULL; current_node=current_node->next){
 		list_element_count++;
 	}
-	
+
 	//allocate the memory + 1 because argument list need to end with NULL pointer
 	arguments = malloc(sizeof(char *) * list_element_count + 1);
 	
@@ -238,6 +235,18 @@ const char* use_env_var(char* tok){
 		}
 	}
 	return ret;
+}
+
+int which_command(command_node * cn)
+{	
+	/*printf("FOR: ");
+	print_linked_list(cn->cmd);
+	printf("next: %p\n", cn->next);
+	printf("index: %d\n", cn->index);*/
+	if (cn->next == NULL && cn->index == 0) return 0; //only one
+	if (cn->next != NULL && cn->index == 0) return 1; //first node
+	if (cn->next != NULL && cn->index != 0) return 2; //middle node
+	if (cn->next == NULL && cn->index != 0) return 3; //last node
 }
 
 

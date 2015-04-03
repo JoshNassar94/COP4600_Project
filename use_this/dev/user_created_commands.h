@@ -16,4 +16,7 @@ void execute_externel_command(command_node *, linked_list *);
 void check_alias_list(linked_list*, char*, char*);
 
 const char* use_env_var(char*);
+
+int which_command(command_node*);
+
 #endif

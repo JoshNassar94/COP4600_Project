@@ -28,11 +28,11 @@ void print_alias_linked_list(linked_list *);
 
 typedef struct command_node{
 	linked_list * cmd;
-	linked_list * next;
-	char * in_file;
-	char * out_file;
-	char * err_file;
-	int append;
+	struct command_node * next;
+	int fd[2];
+	int out_fd;
+	int in_fd;
+	int index;
 } command_node;
 
 //creates an instance of a command_node
