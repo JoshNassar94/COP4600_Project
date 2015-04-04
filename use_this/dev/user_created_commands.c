@@ -83,10 +83,31 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	arguments = malloc(sizeof(char *) * list_element_count + 1);
 	
 	int i=0;
+	int index;
 	current_node = linkedlist->start;
 	for(i=0; i<list_element_count; i++){
-		arguments[i] = current_node->data;
-		current_node = current_node->next;
+		index = isWildcard(current_node->data);
+		if(index != -1){
+			linked_list* files = create_linked_list();
+			int numFiles = 0;
+			DIR *d;
+			struct dirent *dir;
+			d = opendir(getenv("PWD"));
+			if(d){
+				while (dir = readdir(d)){
+					push_linked_list(files, dir->d_name);
+					++numFiles;
+				}
+			}
+			remove_linked_list(files, numFiles-1);
+			remove_linked_list(files, numFiles-2);
+			numFiles -= 2;
+			current_node = addWildcardArguments(files, numFiles, current_node, index, current_node->data);
+		}
+		else{
+			arguments[i] = current_node->data;
+			current_node = current_node->next;
+		}
 	}
 	command = arguments[0];
 	if(is_alias(command, alias_list)){
@@ -241,3 +262,63 @@ const char* use_env_var(char* tok){
 }
 
 
+int isWildcard(char* word){
+	int length = strlen(word);
+	int i;
+	for(i = 0; i < length; ++i){
+		if(word[i] == '*' || word[i] == '?'){
+			return i;
+		}
+	}
+	return -1;
+}
+
+node* addWildcardArguments(linked_list* files, int numFiles, node* current, int index, char* word){
+	linked_list* matchingFiles = create_linked_list();
+	int length = strlen(word);
+	int i;
+	for(i = index; i < length; ++i){
+		if(word[i] == '*' || word[i] == '?'){
+			int j;
+			int k;
+			int file_iter;
+			node* current_node = files->start;
+			for(file_iter = 0; file_iter < numFiles; ++file_iter){
+				int file_length = strlen(current_node->data);
+				
+				if(i == 0){						//check from back
+					int fileMatch = 1;
+					for(j = length-1, k = file_length-1; j > 0; --j, --k){
+						if(word[j] != current_node->data[k]){
+							printf("Doesn't match anything\n");
+							fileMatch = 0;
+							break;
+						}
+					}
+					if(fileMatch){
+						printf("File match\n");
+						push_linked_list(matchingFiles, current_node->data);
+					}
+				}
+				
+				else if(i == length-1){			//check from front
+					for(j = 0; j < length-1; ++j){
+						//check from front
+					}
+				}
+				
+				else{
+					//check from front and back
+				}
+				
+				current_node = current_node->next;
+			}
+		}
+	}
+	printf("\n");
+	print_linked_list(matchingFiles);
+	printf("\n");
+	free_linked_list(files);
+	free_linked_list(matchingFiles);
+	return current->next;
+}

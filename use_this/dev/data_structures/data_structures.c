@@ -77,6 +77,28 @@ void print_alias_linked_list(linked_list * linkedlist){
 	printf("%s = %s\n",current_node->alias_name, current_node->data);
 }
 
+void remove_linked_list(linked_list * linkedlist, int index){
+	node * current_node = linkedlist->start;
+	if(current_node == NULL){
+		return;
+	}
+	
+	if(index == 0){
+		linkedlist->start = current_node->next;
+		return;
+	}
+	--index;
+	
+	while(current_node->next !=NULL){
+		if(index == 0){
+			current_node->next = current_node->next->next;
+			return;
+		}
+		--index;
+		current_node = current_node->next;
+	}
+}
+
 void remove_alias_linked_list(linked_list * linkedlist, char * name){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){

@@ -16,4 +16,10 @@ void execute_externel_command(command_node *, linked_list *);
 void check_alias_list(linked_list*, char*, char*);
 
 const char* use_env_var(char*);
+
+int which_command(command_node*);
+
+int isWildcard(char*);
+
+node* addWildcardArguments(linked_list*, int, node*, int, char*);
 #endif

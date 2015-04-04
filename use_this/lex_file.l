@@ -20,8 +20,8 @@ unalias				return UNALIAS;
 \>\>				return GTGT;
 \>				return GT;
 \|				return PIPE;
-\"[ a-zA-Z0-9\/\-\<\>&.]+\"		yylval.string=strdup(yytext); return WORD;
-["$"\{\}~a-zA-Z0-9\/.\-]+   	yylval.string=strdup(yytext); return WORD;
+\"[ a-zA-Z0-9\/\-\<\>&*?.]+\"		yylval.string=strdup(yytext); return WORD;
+["$"\{\}~a-zA-Z0-9\/.\*?-]+   	yylval.string=strdup(yytext); return WORD;
 
 \n          			return NEW_LINE;       
 [ \t]+                  /* ignore whitespace */;

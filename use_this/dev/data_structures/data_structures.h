@@ -37,6 +37,8 @@ typedef struct command_node{
 
 //creates an instance of a command_node
 command_node * create_command_node();
+
+void remove_linked_list(linked_list *, int);
 void remove_alias_linked_list(linked_list *, char *);
 
 int find_alias_linked_list(linked_list *, char*);
