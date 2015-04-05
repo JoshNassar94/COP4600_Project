@@ -253,9 +253,9 @@ full_cmd:
 								if (close(current_cmd->out_fd) == SYSCALLERR)  { printf("ERROR"); }
 								resolve_input(in_file);			
 								
-								printf("DEBUG: first_here1\n");
+								perror("DEBUG: first_here1\n");
 								execute_externel_command(current_cmd, alias_list);
-								printf("DEBUG: first_here2\n");
+								perror("DEBUG: first_here2\n");
 								exit(0);
 							break;
 							
@@ -326,10 +326,10 @@ cmd:
 			begin->next = end;
 			
 			
-			pipe(begin->fd);
+			pipe(end->fd);
 			
-			begin->out_fd = begin->fd[WRITE_END];
-			end->in_fd = begin->fd[READ_END];
+			begin->out_fd = end->fd[WRITE_END];
+			end->in_fd = end->fd[READ_END];
 			printf("DEBUG: in = %d out = %d\n", end->in_fd, begin->out_fd); 
 			
 			$$ = $1;
