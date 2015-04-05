@@ -297,8 +297,16 @@ int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart,
 				int file_length = strlen(current_node->data);
 				if(i == 0){							//check from back
 					if(checkFromBack(word_length, i, file_length, word, current_node)){
-						++numMatchingFiles;
-						++curr_index;
+						if(word[i] == '?'){
+							if(strlen(word) == strlen(current_node->data)){
+								++numMatchingFiles;
+								++curr_index;
+							}
+						}
+						else{
+							++numMatchingFiles;
+							++curr_index;
+						}
 					}
 					else{
 						remove_linked_list(files, curr_index);
@@ -306,8 +314,16 @@ int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart,
 				}
 				else if(i == word_length-1){		//check from front
 					if(checkFromFront(i, word, current_node)){
-						++numMatchingFiles;
-						++curr_index;
+						if(word[i] == '?'){
+							if(strlen(word) == strlen(current_node->data)){
+								++numMatchingFiles;
+								++curr_index;
+							}
+						}
+						else{
+							++numMatchingFiles;
+							++curr_index;
+						}
 					}
 					else{
 						remove_linked_list(files, curr_index);
@@ -315,8 +331,16 @@ int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart,
 				}
 				else{								//check from front and back
 					if(checkFromFront(i, word, current_node) && checkFromBack(word_length, i, file_length, word, current_node)){
-						++numMatchingFiles;
-						++curr_index;
+						if(word[i] == '?'){
+							if(strlen(word) == strlen(current_node->data)){
+								++numMatchingFiles;
+								++curr_index;
+							}
+						}
+						else{
+							++numMatchingFiles;
+							++curr_index;
+						}
 					}
 					else{
 						remove_linked_list(files, curr_index);
