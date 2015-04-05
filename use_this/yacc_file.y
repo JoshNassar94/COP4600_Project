@@ -221,63 +221,55 @@ full_cmd:
 			command_node * current_cmd = $1;
 			while (current_cmd)
 			{
-				printf( "count %d\n******\n", which_command(current_cmd));
-				print_linked_list(current_cmd->cmd);
-				printf("next: %p\n", current_cmd->next);
-				printf("index: %d\n", current_cmd->index);
-				printf("******\n\n");
+			
 				switch( pid = fork() )
 				{
 					case 0:			//in child
 						switch( which_command(current_cmd) )
 						{
 							case ONLY_ONE:
-								printf("DEBUG: found only command\n");
-								print_linked_list(current_cmd->cmd);
 								resolve_input(in_file);
 								resolve_output(out_file, out_append);
 								
-								printf("DEBUG: first_here1\n");
 								execute_externel_command(current_cmd, alias_list);
-								printf("DEBUG: first_here2\n");
 								
-								exit(0);
 							break;
 							
 							case FIRST:
-								printf("DEBUG: found first\n");
-								printf("DEBUG: out_fd = %d\n", current_cmd->out_fd);
 								
 								if (close(STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
-								if (dup(current_cmd->out_fd) != 1)  { printf("ERROR"); }
-								if (close(current_cmd->out_fd) == SYSCALLERR)  { printf("ERROR"); }
+								if (dup(current_cmd->next->fd[WRITE_END]) != 1)  { printf("ERROR"); }
+								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
 								resolve_input(in_file);			
 								
-								perror("DEBUG: first_here1\n");
 								execute_externel_command(current_cmd, alias_list);
-								perror("DEBUG: first_here2\n");
-								exit(0);
+								
 							break;
 							
 							case LAST:
-								printf("DEBUG: found last\n");
-								printf("DEBUG: in_fd = %d\n", current_cmd->in_fd);
 								
 								if (close(STDIN_FILENO) == SYSCALLERR) { printf("ERROR 1\n"); }
-								if (dup(current_cmd->in_fd) != 0)  { printf("ERROR 2\n"); }
-								if (close(current_cmd->in_fd) == SYSCALLERR)  { printf("ERROR 3\n"); }
+								if (dup(current_cmd->fd[READ_END]) != 0)  { printf("ERROR 2\n"); }
+								//if (close(current_cmd->fd[WRITE_END]) == SYSCALLERR)  { printf("ERROR 3\n"); }
 								resolve_output(out_file, out_append);
 								
-								printf("DEBUG: last_here1\n");
+					
 								execute_externel_command(current_cmd, alias_list);
-								printf("DEBUG: last_here2\n");
-								exit(0);
+								
 							break;	
+							
+							default:
+								perror("WTF?????????");
+							break;
 								
 						}
 					break;
 					
 					default:			//in parent
+						if (current_cmd->next) 
+						{
+							close(current_cmd->next->fd[WRITE_END]);
+						}
 						free_linked_list(current_cmd->cmd);
 						waitpid(pid, &status, 0);
 
@@ -290,6 +282,19 @@ full_cmd:
 		out_file = NULL;
 	}
 cmd:
+		cmd PIPE cmd
+		{
+			command_node * begin = $1;
+			command_node * end = $3;
+			end->index = begin->index + 1;
+			
+			begin->next = end;
+			
+			pipe(end->fd);
+			
+			$$ = $1;
+		}
+		|
 		cmd LT WORD
 		{
 			if (in_file) error_code = 1;
@@ -313,30 +318,7 @@ cmd:
 			out_append = 0;
 		}
 		|
-		cmd PIPE cmd
-		{
-			printf("DEBUG: piping\n");
-			command_node * begin = $1;
-			command_node * end = $3;
-			end->index = begin->index + 1;
-
-			if (in_file) error_code = 1;
-			if (out_file) error_code = 1;
-			
-			begin->next = end;
-			
-			
-			pipe(end->fd);
-			
-			begin->out_fd = end->fd[WRITE_END];
-			end->in_fd = end->fd[READ_END];
-			printf("DEBUG: in = %d out = %d\n", end->in_fd, begin->out_fd); 
-			
-			$$ = $1;
-			//print_linked_list(end->cmd);
-			//printf("DEBUG: found pipe %s\n", );
-		}
-		|
+		
 		arg_list
 		{
 			$$ = $1;
