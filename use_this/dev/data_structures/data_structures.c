@@ -51,6 +51,41 @@ void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 	}
 }
 
+void insert_linked_list(linked_list* linkedlist, char* data, int position){
+	node * current_node = linkedlist->start;
+	if(current_node == NULL){
+		return;
+	}
+	
+	if(position == 0){
+		if(linkedlist->start == NULL){
+			push_linked_list(linkedlist, data);
+			return;
+		}
+		else{
+			node* new_node = malloc(sizeof(node));
+			new_node->data = data;
+			new_node->next = current_node;
+			linkedlist->start = new_node;
+			return;
+		}
+	}
+	--position;
+	
+	while(current_node->next !=NULL){
+		if(position == 0){
+			node* new_node = malloc(sizeof(node));
+			new_node->data = data;
+			node* tmp = current_node->next;
+			current_node->next = new_node;
+			new_node->next = tmp;
+			return;
+		}
+		--position;
+		current_node = current_node->next;
+	}
+}
+
 void print_linked_list(linked_list * linkedlist){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -77,24 +112,24 @@ void print_alias_linked_list(linked_list * linkedlist){
 	printf("%s = %s\n",current_node->alias_name, current_node->data);
 }
 
-void remove_linked_list(linked_list * linkedlist, int index){
+void remove_linked_list(linked_list * linkedlist, int position){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
 		return;
 	}
 	
-	if(index == 0){
+	if(position == 0){
 		linkedlist->start = current_node->next;
 		return;
 	}
-	--index;
+	--position;
 	
 	while(current_node->next !=NULL){
-		if(index == 0){
+		if(position == 0){
 			current_node->next = current_node->next->next;
 			return;
 		}
-		--index;
+		--position;
 		current_node = current_node->next;
 	}
 }

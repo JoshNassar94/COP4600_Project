@@ -74,20 +74,18 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 
 	//count the number of elements in the linked list so we know how much memory to allocate for the array;
 	int list_element_count=1;
-	node * current_node;
-	for(current_node = linkedlist->start; current_node->next != NULL; current_node=current_node->next){
-		list_element_count++;
-	}
-	
-	//allocate the memory + 1 because argument list need to end with NULL pointer
-	arguments = malloc(sizeof(char *) * list_element_count + 1);
-	
-	int i=0;
+	node * current_node = linkedlist->start;
 	int index;
+	int counter = 1;
+	for(current_node = linkedlist->start; current_node->next != NULL; current_node=current_node->next){
+		counter++;
+	}
+	int list_iter;
 	current_node = linkedlist->start;
-	for(i=0; i<list_element_count; i++){
-		index = isWildcard(current_node->data);
+	for(list_iter = 0; list_iter < counter-1; ++list_iter){
+		index = isWildcard(current_node->next->data);
 		if(index != -1){
+			char* word = current_node->next->data;
 			linked_list* files = create_linked_list();
 			int numFiles = 0;
 			DIR *d;
@@ -99,15 +97,28 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 					++numFiles;
 				}
 			}
+			remove_linked_list(files, numFiles);
 			remove_linked_list(files, numFiles-1);
-			remove_linked_list(files, numFiles-2);
 			numFiles -= 2;
-			current_node = addWildcardArguments(files, numFiles, current_node, index, current_node->data);
+			list_element_count += addWildcardArguments(files, numFiles, 0, linkedlist, current_node->next, index, word, list_element_count);
+			free_linked_list(files);
+			current_node=current_node->next;
+			remove_linked_list(linkedlist, list_element_count);
 		}
 		else{
-			arguments[i] = current_node->data;
-			current_node = current_node->next;
+			list_element_count++;
+			current_node=current_node->next;
 		}
+	}
+	
+	//allocate the memory + 1 because argument list need to end with NULL pointer
+	arguments = malloc(sizeof(char *) * list_element_count + 1);
+	
+	int i=0;
+	current_node = linkedlist->start;
+	for(i=0; i<list_element_count; i++){
+		arguments[i] = current_node->data;
+		current_node = current_node->next;
 	}
 	command = arguments[0];
 	if(is_alias(command, alias_list)){
@@ -273,52 +284,73 @@ int isWildcard(char* word){
 	return -1;
 }
 
-node* addWildcardArguments(linked_list* files, int numFiles, node* current, int index, char* word){
-	linked_list* matchingFiles = create_linked_list();
-	int length = strlen(word);
+int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart, linked_list* ll, node* current, int index, char* word, int insertAt){
+	int numMatchingFiles = 0;
+	int word_length = strlen(word);
 	int i;
-	for(i = index; i < length; ++i){
+	for(i = index; i < word_length; ++i){
 		if(word[i] == '*' || word[i] == '?'){
-			int j;
-			int k;
 			int file_iter;
 			node* current_node = files->start;
+			int curr_index = 0;
 			for(file_iter = 0; file_iter < numFiles; ++file_iter){
 				int file_length = strlen(current_node->data);
-				
-				if(i == 0){						//check from back
-					int fileMatch = 1;
-					for(j = length-1, k = file_length-1; j > 0; --j, --k){
-						if(word[j] != current_node->data[k]){
-							printf("Doesn't match anything\n");
-							fileMatch = 0;
-							break;
-						}
+				if(i == 0){							//check from back
+					if(checkFromBack(word_length, i, file_length, word, current_node)){
+						++numMatchingFiles;
+						++curr_index;
 					}
-					if(fileMatch){
-						printf("File match\n");
-						push_linked_list(matchingFiles, current_node->data);
+					else{
+						remove_linked_list(files, curr_index);
 					}
 				}
-				
-				else if(i == length-1){			//check from front
-					for(j = 0; j < length-1; ++j){
-						//check from front
+				else if(i == word_length-1){		//check from front
+					if(checkFromFront(i, word, current_node)){
+						++numMatchingFiles;
+						++curr_index;
+					}
+					else{
+						remove_linked_list(files, curr_index);
 					}
 				}
-				
-				else{
-					//check from front and back
+				else{								//check from front and back
+					if(checkFromFront(i, word, current_node) && checkFromBack(word_length, i, file_length, word, current_node)){
+						++numMatchingFiles;
+						++curr_index;
+					}
+					else{
+						remove_linked_list(files, curr_index);
+					}
 				}
-				
 				current_node = current_node->next;
 			}
+			numFiles = numMatchingFiles;
 		}
 	}
-	printf("\n");
-	print_linked_list(matchingFiles);
-	printf("\n");
-	free_linked_list(files);
-	free_linked_list(matchingFiles);
-	return current->next;
+	node* curr = files->start;
+	for(i = 0; i < numMatchingFiles; ++i){
+		insert_linked_list(ll, curr->data, insertAt);
+		curr = curr->next;
+	}
+	return numMatchingFiles;
+}
+
+int checkFromBack(int word_length, int index, int file_length, char* word, node* current_node){
+	int j, k;
+	for(j = word_length-1, k = file_length-1; j > index; --j, --k){
+		if(word[j] != current_node->data[k]){
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int checkFromFront(int index, char* word, node* current_node){
+	int j;
+	for(j = 0; j < index; ++j){
+		if(word[j] != current_node->data[j]){
+			return 0;
+		}
+	}
+	return 1;
 }
