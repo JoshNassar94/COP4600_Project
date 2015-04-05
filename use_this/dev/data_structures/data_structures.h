@@ -19,8 +19,11 @@ linked_list * create_linked_list();
 void free_linked_list(linked_list * linkedlist);
 
 //adds an element to a linked list
-void push_linked_list(linked_list * linkedlist, char * data);
+void push_linked_list(linked_list*, char*);
 void push_alias_linked_list(linked_list *, char *, char *);
+
+//inserts an element into a linked list
+void insert_linked_list(linked_list *, char*, int);
 
 //function used for debugging linked list. Simply traverse the linked list and print all its elements.
 void print_linked_list(linked_list * linkedlist);
@@ -37,6 +40,8 @@ typedef struct command_node{
 
 //creates an instance of a command_node
 command_node * create_command_node();
+
+void remove_linked_list(linked_list *, int);
 void remove_alias_linked_list(linked_list *, char *);
 
 int find_alias_linked_list(linked_list *, char*);

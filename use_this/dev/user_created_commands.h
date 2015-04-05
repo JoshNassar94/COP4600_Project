@@ -19,4 +19,11 @@ const char* use_env_var(char*);
 
 int which_command(command_node*);
 
+int isWildcard(char*);
+
+int addWildcardArguments(linked_list*, int, int, linked_list*, node*, int, char*, int);
+
+int checkFromBack(int, int, int, char*, node*);
+
+int checkFromFront(int, char*, node*);
 #endif
