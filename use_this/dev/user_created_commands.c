@@ -68,21 +68,25 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	//char * envp = getenv("PATH");
 	
 	linked_list * linkedlist = commandNode->cmd;
-
+	linked_list* ll_copy = create_linked_list();
 	//count the number of elements in the linked list so we know how much memory to allocate for the array;
 	int list_element_count=1;
 	node * current_node = linkedlist->start;
 	int index;
 	int counter = 1;
+	push_linked_list(ll_copy, current_node->data);
 	for(current_node = linkedlist->start; current_node->next != NULL; current_node=current_node->next){
+		push_linked_list(ll_copy, current_node->next->data);
 		counter++;
 	}
+	
 	int list_iter;
 	current_node = linkedlist->start;
+	node* copy_curr_node = ll_copy->start;
 	for(list_iter = 0; list_iter < counter-1; ++list_iter){
-		index = isWildcard(current_node->next->data);
+		index = isWildcard(copy_curr_node->next->data);
 		if(index != -1){
-			char* word = current_node->next->data;
+			char* word = copy_curr_node->next->data;
 			linked_list* files = create_linked_list();
 			int numFiles = 0;
 			DIR *d;
@@ -97,14 +101,14 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 			remove_linked_list(files, numFiles);
 			remove_linked_list(files, numFiles-1);
 			numFiles -= 2;
-			list_element_count += addWildcardArguments(files, numFiles, 0, linkedlist, current_node->next, index, word, list_element_count);
+			list_element_count += addWildcardArguments(files, numFiles, 0, linkedlist, copy_curr_node->next, index, word, list_element_count);
 			free_linked_list(files);
-			current_node=current_node->next;
+			copy_curr_node=copy_curr_node->next;
 			remove_linked_list(linkedlist, list_element_count);
 		}
 		else{
 			list_element_count++;
-			current_node=current_node->next;
+			copy_curr_node=copy_curr_node->next;
 		}
 	}
 
