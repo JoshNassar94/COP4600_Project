@@ -9,12 +9,28 @@
 #define PWD getenv("PWD")
 #define copystring(a,b) strcpy((a=(char *)malloc(strlen(b)+1)),b)
 
+#define ONLY_ONE 0
+#define FIRST 1
+#define MIDDLE 2
+#define LAST 3
+
+#define READ_END 0
+#define WRITE_END 1
+
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
+#define SYSCALLERR -1
+
 extern FILE *yyin;
 extern FILE *yyout;
 char* cd_pwd;
 linked_list* alias_list;
 
 int error_code = 0;
+
+//These are the in and out ifle for a command
 char * in_file;
 char * out_file;
 int out_append;
@@ -201,22 +217,73 @@ full_cmd:
 		else
 		{
 			int status;
-			pid_t pid = fork();			//this is going to need to be inside execute_external 
+			pid_t pid;
+			command_node * current_cmd = $1;
+			while (current_cmd)
+			{
+				printf( "count %d\n******\n", which_command(current_cmd));
+				print_linked_list(current_cmd->cmd);
+				printf("next: %p\n", current_cmd->next);
+				printf("index: %d\n", current_cmd->index);
+				printf("******\n\n");
+				switch( pid = fork() )
+				{
+					case 0:			//in child
+						switch( which_command(current_cmd) )
+						{
+							case ONLY_ONE:
+								printf("DEBUG: found only command\n");
+								print_linked_list(current_cmd->cmd);
+								resolve_input(in_file);
+								resolve_output(out_file, out_append);
+								
+								printf("DEBUG: first_here1\n");
+								execute_externel_command(current_cmd, alias_list);
+								printf("DEBUG: first_here2\n");
+								
+								exit(0);
+							break;
+							
+							case FIRST:
+								printf("DEBUG: found first\n");
+								printf("DEBUG: out_fd = %d\n", current_cmd->out_fd);
+								
+								if (close(STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
+								if (dup(current_cmd->out_fd) != 1)  { printf("ERROR"); }
+								if (close(current_cmd->out_fd) == SYSCALLERR)  { printf("ERROR"); }
+								resolve_input(in_file);			
+								
+								printf("DEBUG: first_here1\n");
+								execute_externel_command(current_cmd, alias_list);
+								printf("DEBUG: first_here2\n");
+								exit(0);
+							break;
+							
+							case LAST:
+								printf("DEBUG: found last\n");
+								printf("DEBUG: in_fd = %d\n", current_cmd->in_fd);
+								
+								if (close(STDIN_FILENO) == SYSCALLERR) { printf("ERROR 1\n"); }
+								if (dup(current_cmd->in_fd) != 0)  { printf("ERROR 2\n"); }
+								if (close(current_cmd->in_fd) == SYSCALLERR)  { printf("ERROR 3\n"); }
+								resolve_output(out_file, out_append);
+								
+								printf("DEBUG: last_here1\n");
+								execute_externel_command(current_cmd, alias_list);
+								printf("DEBUG: last_here2\n");
+								exit(0);
+							break;	
+								
+						}
+					break;
+					
+					default:			//in parent
+						free_linked_list(current_cmd->cmd);
+						waitpid(pid, &status, 0);
 
-			if(pid == 0){	//this means in child
-				//This function is defined in user_created_commands.c
-				
-				resolve_input(in_file);
-				resolve_output(out_file, out_append);
-				
-				execute_externel_command($1, alias_list);
-				
-				
-				
-				exit(0);
-			}else{			//in parent
-				free_linked_list($1);
-				waitpid(pid, &status, 0);
+					break;
+				}
+				current_cmd = current_cmd->next;
 			}
 		}
 		in_file = NULL;
@@ -225,12 +292,14 @@ full_cmd:
 cmd:
 		cmd LT WORD
 		{
+			if (in_file) error_code = 1;
 			command_node * cn = $1;
 			in_file = $3;
 		}
 		|
 		cmd GTGT WORD
 		{
+			if (out_file) error_code = 1;
 			command_node * cn = $1;
 			out_file = $3;
 			out_append = 1;
@@ -238,6 +307,7 @@ cmd:
 		|
 		cmd GT WORD
 		{
+			if (out_file) error_code = 1;
 			command_node * cn = $1;
 			out_file = $3;
 			out_append = 0;
@@ -245,17 +315,26 @@ cmd:
 		|
 		cmd PIPE cmd
 		{
+			printf("DEBUG: piping\n");
 			command_node * begin = $1;
 			command_node * end = $3;
+			end->index = begin->index + 1;
 
 			if (in_file) error_code = 1;
-
-			printf("DEBUG_PIPE: in_file 1 = %s\n", begin->in_file);
-			printf("DEBUG_PIPE: in_file 2 = %s\n", end->in_file);
+			if (out_file) error_code = 1;
 			
 			begin->next = end;
-			print_linked_list(end->cmd);
-			//printf("DEBUG: found pipe %s", );
+			
+			
+			pipe(begin->fd);
+			
+			begin->out_fd = begin->fd[WRITE_END];
+			end->in_fd = begin->fd[READ_END];
+			printf("DEBUG: in = %d out = %d\n", end->in_fd, begin->out_fd); 
+			
+			$$ = $1;
+			//print_linked_list(end->cmd);
+			//printf("DEBUG: found pipe %s\n", );
 		}
 		|
 		arg_list
@@ -270,6 +349,7 @@ arg_list:
 		arg
 		{
 			command_node * cn = create_command_node();
+			cn->index = 0;
 			//linked_list* ll = create_linked_list();
 			push_linked_list(cn->cmd,$1);
 			$$=cn;
