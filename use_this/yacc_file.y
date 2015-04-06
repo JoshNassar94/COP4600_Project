@@ -232,7 +232,7 @@ full_cmd:
 								resolve_output(out_file, out_append);
 								
 								execute_externel_command(current_cmd, alias_list);
-								
+								exit(0);
 							break;
 							
 							case FIRST:
@@ -243,7 +243,7 @@ full_cmd:
 								resolve_input(in_file);			
 								
 								execute_externel_command(current_cmd, alias_list);
-								
+								exit(0);
 							break;
 							
 							case LAST:
@@ -255,7 +255,7 @@ full_cmd:
 								
 					
 								execute_externel_command(current_cmd, alias_list);
-								
+								exit(0);
 							break;	
 							
 							default:
