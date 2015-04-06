@@ -38,7 +38,6 @@ void push_linked_list(linked_list * linkedlist, char * data){
 }
 
 void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
-	printf("GOT TO PUSH\n");
 	node * new_node = malloc(sizeof(node));
 	new_node->data = data;
 	new_node->alias_name = name;
@@ -51,7 +50,6 @@ void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 		linkedlist->start = new_node;
 		linkedlist->end = new_node;
 	}
-	printf("PUSHED\n");
 }
 
 void insert_linked_list(linked_list* linkedlist, char* data, int position){
