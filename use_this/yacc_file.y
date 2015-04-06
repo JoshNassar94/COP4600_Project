@@ -198,6 +198,7 @@ alias:
 	}
 	| ALIAS WORD WORD
 	{
+		printf("READ THE INPUT\n");
 		check_alias_list(alias_list, $2, $3);
 	};
 	

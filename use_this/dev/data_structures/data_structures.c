@@ -5,6 +5,7 @@
 linked_list * create_linked_list(){
 	linked_list * linkedlist = malloc(sizeof(linked_list));
 	linkedlist->start = NULL;
+	linkedlist->end = NULL;
 	return linkedlist;
 }
 
@@ -37,6 +38,7 @@ void push_linked_list(linked_list * linkedlist, char * data){
 }
 
 void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
+	printf("GOT TO PUSH\n");
 	node * new_node = malloc(sizeof(node));
 	new_node->data = data;
 	new_node->alias_name = name;
@@ -49,6 +51,7 @@ void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 		linkedlist->start = new_node;
 		linkedlist->end = new_node;
 	}
+	printf("PUSHED\n");
 }
 
 void insert_linked_list(linked_list* linkedlist, char* data, int position){
@@ -176,6 +179,7 @@ int find_alias_linked_list(linked_list * linkedlist, char* name){
 	while(current_node->next != NULL){
 		if(strcmp(current_node->next->alias_name, name) == 0)
 			return 1;
+		current_node = current_node->next;
 	}
 	return 0;
 }
