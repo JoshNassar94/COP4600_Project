@@ -148,7 +148,8 @@ change_dir:
 	| CD WORD
 	{
 		$2 = insert_env($2);
-		chdir($2);
+		char* dest = remove_quotes($2);
+		chdir(dest);
 		char pwd[4096];
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
