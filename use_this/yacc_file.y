@@ -165,6 +165,15 @@ change_dir:
 		chdir(getenv("HOME"));
 		setenv("PWD", getenv("HOME"), 1);
 	}
+	| CD AMPERSAND
+	{
+		int process = fork();
+		if(process == 0){
+			chdir(getenv("HOME"));
+			setenv("PWD", getenv("HOME"), 1);
+			exit(1);
+		}
+	}
 	| CD WORD
 	{
 		$2 = insert_env($2);
@@ -174,6 +183,20 @@ change_dir:
 		char pwd[4096];
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
+	}
+	| CD WORD AMPERSAND
+	{
+		int process = fork();
+		if(process == 0){
+			$2 = insert_env($2);
+			char* dest = remove_quotes($2);
+			if(chdir(dest) == -1)
+				printf("No such directory!\n");
+			char pwd[4096];
+			getcwd(pwd, sizeof(pwd));
+			setenv("PWD", pwd, 1);
+			exit(1);
+		}
 	};
 	
 bye:
@@ -181,6 +204,14 @@ bye:
 	{
 		printf("Exiting the shell now...\n");
 		exit(0);
+	}
+	| BYE
+	{
+		int process = fork();
+		if(process == 0){
+			printf("Exiting the shell now...\n");
+			exit(1);
+		}
 	};
 	
 print_enviro:
@@ -192,6 +223,17 @@ print_enviro:
 			printf("%s\n", environ[i++]);
 		char* path = getenv("PATH");
 	}
+	| PRINT_ENV AMPERSAND
+	{
+		int process = fork();
+		if(process == 0){
+			extern char **environ;
+			int i=0;
+			while(environ[i])
+				printf("%s\n", environ[i++]);
+			char* path = getenv("PATH");
+		}
+	};
 	
 set_enviro:
 	SET_ENV WORD WORD
@@ -217,6 +259,14 @@ alias:
 	ALIAS
 	{
 		print_alias_linked_list(alias_list);
+	}
+	| ALIAS AMPERSAND
+	{
+		int process = fork();
+		if(process == 0){
+			print_alias_linked_list(alias_list);
+			exit(1);
+		}
 	}
 	| ALIAS WORD WORD
 	{
@@ -303,6 +353,79 @@ full_cmd:
 		in_file = NULL;
 		out_file = NULL;
 	}
+	| cmd AMPERSAND
+	{
+		if (error_code)
+		{
+			printf("error: unrecognized error\n");
+			error_code = 0;
+		}
+		else
+		{
+			int status;
+			pid_t pid;
+			command_node * current_cmd = $1;
+			while (current_cmd)
+			{
+			
+				switch( pid = fork() )
+				{
+					case 0:			//in child
+						switch( which_command(current_cmd) )
+						{
+							case ONLY_ONE:
+								resolve_input(in_file);
+								resolve_output(out_file, out_append);
+								
+								execute_externel_command(current_cmd, alias_list);
+								exit(0);
+							break;
+							
+							case FIRST:
+								
+								if (close(STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
+								if (dup(current_cmd->next->fd[WRITE_END]) != 1)  { printf("ERROR"); }
+								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
+								resolve_input(in_file);			
+								
+								execute_externel_command(current_cmd, alias_list);
+								exit(0);
+							break;
+							
+							case LAST:
+								
+								if (close(STDIN_FILENO) == SYSCALLERR) { printf("ERROR 1\n"); }
+								if (dup(current_cmd->fd[READ_END]) != 0)  { printf("ERROR 2\n"); }
+								//if (close(current_cmd->fd[WRITE_END]) == SYSCALLERR)  { printf("ERROR 3\n"); }
+								resolve_output(out_file, out_append);
+								
+					
+								execute_externel_command(current_cmd, alias_list);
+								exit(0);
+							break;	
+							
+							default:
+								perror("WTF?????????");
+							break;
+								
+						}
+					break;
+					
+					default:			//in parent
+						if (current_cmd->next) 
+						{
+							close(current_cmd->next->fd[WRITE_END]);
+						}
+						free_linked_list(current_cmd->cmd);
+
+					break;
+				}
+				current_cmd = current_cmd->next;
+			}
+		}
+		in_file = NULL;
+		out_file = NULL;
+	};
 cmd:
 		cmd PIPE cmd
 		{
