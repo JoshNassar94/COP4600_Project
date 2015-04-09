@@ -395,17 +395,10 @@ int checkFromFront(int index, char* word, node* current_node){
 }
 
 char* remove_quotes(char* word){
-	if(word[0] == '"'){
-		int i;
-		int length = strlen(word);
-		char* ret;
-		for(i = 0; i < length-2; ++i){
-			ret[i] = word[i+1];
-		}
-		ret[length-2] = '\0';
-		return ret; 
+	char* ret = word;
+	if(ret[0] == '"'){
+		ret++;
+		ret[strlen(ret)-1] = 0;
 	}
-	else{
-		return word;
-	}
+	return ret;
 }

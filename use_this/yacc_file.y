@@ -178,6 +178,9 @@ change_dir:
 	{
 		$2 = insert_env($2);
 		char* dest = remove_quotes($2);
+		if(is_alias(dest, alias_list)){
+			dest = get_alias_linked_list(alias_list, dest);
+		}
 		if(chdir(dest) == -1)
 			printf("No such directory!\n");
 		char pwd[4096];
@@ -190,6 +193,9 @@ change_dir:
 		if(process == 0){
 			$2 = insert_env($2);
 			char* dest = remove_quotes($2);
+			if(is_alias(dest, alias_list)){
+				dest = get_alias_linked_list(alias_list, dest);
+			}
 			if(chdir(dest) == -1)
 				printf("No such directory!\n");
 			char pwd[4096];
@@ -238,8 +244,8 @@ print_enviro:
 set_enviro:
 	SET_ENV WORD WORD
 	{
-		char* envname = insert_env($<string>2);
-		char* envval = insert_env($<string>3);
+		char* envname = remove_quotes(insert_env($<string>2));
+		char* envval = remove_quotes(insert_env($<string>3));
 		int result = setenv(envname, envval, 1);
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
@@ -248,7 +254,7 @@ set_enviro:
 unset_enviro:
 	UNSET_ENV WORD
 	{
-		char* name = $<string>2;
+		char* name = remove_quotes(insert_env($<string>2));
 		if(getenv(name))
 			unsetenv(name);
 		else
@@ -271,6 +277,7 @@ alias:
 	| ALIAS WORD WORD
 	{
 		char* arg = insert_env($<string>3);
+		arg = remove_quotes(arg);
 		check_alias_list(alias_list, $2, arg);
 	};
 	
@@ -485,9 +492,18 @@ arg_list:
 		|
 		arg_list arg
 		{
-			$2 = insert_env($2);		//change all instances of ${ENV} to the coresponding variable
+			$2 = remove_quotes(insert_env($2));		//change all instances of ${ENV} to the coresponding variable
 			command_node * cn = $1;
-			push_linked_list(cn->cmd,$2); 
+			if(is_alias($2, alias_list)){
+				const char s[2] = " ";
+				char* tok = strtok(get_alias_linked_list(alias_list, $2), s);
+				while(tok != NULL){
+					push_linked_list(cn->cmd, tok);
+					tok = strtok(NULL, s);
+				}
+			}
+			else
+				push_linked_list(cn->cmd,$2); 
 			$$ = $1;
 		}
 	
