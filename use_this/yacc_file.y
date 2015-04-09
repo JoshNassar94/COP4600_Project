@@ -352,6 +352,15 @@ full_cmd:
 								exit(0);
 							break;	
 							
+							case MIDDLE:
+								if (dup2(current_cmd->fd[READ_END], STDIN_FILENO) == SYSCALLERR) { printf("ERROR"); }
+								if (dup2(current_cmd->next->fd[WRITE_END], STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
+								
+								resolve_error(err_file, to_std_in);
+								
+								execute_externel_command(current_cmd, alias_list);
+								exit(0);
+							
 							default:
 								perror("WTF?????????");
 							break;
