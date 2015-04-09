@@ -60,6 +60,28 @@ void resolve_output(char* out_file, int append)
 		dup(fd);*/
 	}
 }
+void resolve_error(char * err_file, int tostd)
+{
+	int fd;
+	if (tostd) 
+	{
+		close(STDERR_FILENO);
+		dup(STDIN_FILENO);
+	}
+	else
+	{
+		fd = open(err_file, O_WRONLY | O_TRUNC | O_CREAT, S_IREAD | S_IWRITE);
+		if (fd == -1)
+		{
+			perror("error: in user_created_commands.c");
+			exit (1);
+		}
+		close(STDERR_FILENO);
+		dup(fd);
+		close(fd);
+	}
+
+}
 
 void execute_externel_command(command_node * commandNode, linked_list * alias_list){
 	char * command;

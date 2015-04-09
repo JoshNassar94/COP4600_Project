@@ -33,7 +33,9 @@ int error_code = 0;
 //These are the in and out ifle for a command
 char * in_file;
 char * out_file;
+char * err_file;
 int out_append;
+int to_std_in;
 
 void yyerror(const char *str)
 {
@@ -126,7 +128,6 @@ char * insert_env(char* input)
 
 char * tilda_expansion(char * input)
 {
-	printf("doing tilda things\n");
 	char * s = input;
 	int i;
 	if (strlen(s) == 1) return replace(s, "~", getenv("HOME"));
@@ -137,7 +138,7 @@ char * tilda_expansion(char * input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND GT GTGT LT PIPE TEST
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE TEST ERR_TO_OUT
 
 %union
 {
@@ -321,7 +322,7 @@ full_cmd:
 							case ONLY_ONE:
 								resolve_input(in_file);
 								resolve_output(out_file, out_append);
-								
+								resolve_error(err_file, to_std_in);
 								execute_externel_command(current_cmd, alias_list);
 								exit(0);
 							break;
@@ -331,7 +332,8 @@ full_cmd:
 								if (close(STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
 								if (dup(current_cmd->next->fd[WRITE_END]) != 1)  { printf("ERROR"); }
 								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
-								resolve_input(in_file);			
+								resolve_input(in_file);		
+								resolve_error(err_file, to_std_in);	
 								
 								execute_externel_command(current_cmd, alias_list);
 								exit(0);
@@ -343,6 +345,7 @@ full_cmd:
 								if (dup(current_cmd->fd[READ_END]) != 0)  { printf("ERROR 2\n"); }
 								//if (close(current_cmd->fd[WRITE_END]) == SYSCALLERR)  { printf("ERROR 3\n"); }
 								resolve_output(out_file, out_append);
+								resolve_error(err_file, to_std_in);
 								
 					
 								execute_externel_command(current_cmd, alias_list);
@@ -371,6 +374,8 @@ full_cmd:
 		}
 		in_file = NULL;
 		out_file = NULL;
+		err_file = NULL;
+		to_std_in = 1;
 	}
 	| cmd AMPERSAND
 	{
@@ -482,7 +487,20 @@ cmd:
 			out_append = 0;
 		}
 		|
-		
+		cmd ERR_TO_OUT
+		{
+			to_std_in = 1;
+		}
+		|
+		cmd ERR_GT WORD
+		{
+			if (err_file) error_code =1;
+			err_file = $3;
+			to_std_in = 0;
+			
+			char * file = $3;
+		}
+		|
 		arg_list
 		{
 			$$ = $1;

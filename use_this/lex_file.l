@@ -16,6 +16,8 @@ unsetenv			return UNSET_ENV;
 alias				return ALIAS;
 unalias				return UNALIAS;
 &				return AMPERSAND;
+2\>&1				return ERR_TO_OUT;
+2\>				return ERR_GT;
 \<				return LT;
 \>\>				return GTGT;
 \>				return GT;
