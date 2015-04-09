@@ -26,4 +26,6 @@ int addWildcardArguments(linked_list*, int, int, linked_list*, node*, int, char*
 int checkFromBack(int, int, int, char*, node*);
 
 int checkFromFront(int, char*, node*);
+
+char* remove_quotes(char*);
 #endif

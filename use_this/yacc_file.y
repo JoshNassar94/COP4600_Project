@@ -74,6 +74,21 @@ char *replace(char *str, char *orig, char * rep)
 	return buffer;
 }
 
+char* handle_escape_char(char *str, char *orig, char* second_half)
+{
+	static char buffer[4096];
+	char *p;
+	if(!(p = strstr(str, orig))) return str; //is orig actually in str
+	
+	strncpy(buffer, str, p-str); //copy char from str start to orig into buffer
+	buffer[p-str] = str[p-str+1];
+	static char buffer2[4096];
+	
+	sprintf(buffer2, "%s%s%c", buffer, second_half+2, '\0');
+	
+	return buffer2;
+}
+
 char * insert_env(char* input)
 {
 	char * s = input;
@@ -100,13 +115,18 @@ char * insert_env(char* input)
 		}
 	
 	}
+	char* pos;
+	if(pos = strchr(s, '\\')){
+		s = handle_escape_char(s, "\\", pos);
+		printf("%s\n", s);
+	}
 	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
 	return s;
 }
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND GT GTGT LT PIPE
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND GT GTGT LT PIPE TEST
 
 %union
 {
@@ -116,6 +136,7 @@ char * insert_env(char* input)
 }
 %left CD ALIAS WORD
 %token <string> WORD
+%token <string> TEST
 %type <linkedlist> arg_list
 %type <linkedlist> cmd
 %type <string> arg
@@ -123,7 +144,6 @@ char * insert_env(char* input)
 commands:
 		| commands command
 		{
-			
 			printf("%s$ ",getenv("PWD"));
 		};
 
@@ -149,7 +169,8 @@ change_dir:
 	{
 		$2 = insert_env($2);
 		char* dest = remove_quotes($2);
-		chdir(dest);
+		if(chdir(dest) == -1)
+			printf("No such directory!\n");
 		char pwd[4096];
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
