@@ -45,6 +45,7 @@ void remove_linked_list(linked_list *, int);
 void remove_alias_linked_list(linked_list *, char *);
 
 int find_alias_linked_list(linked_list *, char*);
+char* get_alias_linked_list(linked_list*, char*);
 
 void replace_value_alias_linked_list(linked_list *, char*, char*);
 #endif

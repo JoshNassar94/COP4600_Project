@@ -270,7 +270,8 @@ alias:
 	}
 	| ALIAS WORD WORD
 	{
-		check_alias_list(alias_list, $2, $3);
+		char* arg = insert_env($<string>3);
+		check_alias_list(alias_list, $2, arg);
 	};
 	
 unalias:

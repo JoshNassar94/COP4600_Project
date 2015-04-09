@@ -69,6 +69,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	
 	linked_list * linkedlist = commandNode->cmd;
 	linked_list* ll_copy = create_linked_list();
+	
 	//count the number of elements in the linked list so we know how much memory to allocate for the array;
 	int list_element_count=1;
 	node * current_node = linkedlist->start;
@@ -402,7 +403,7 @@ char* remove_quotes(char* word){
 			ret[i] = word[i+1];
 		}
 		ret[length-2] = '\0';
-		return ret;
+		return ret; 
 	}
 	else{
 		return word;

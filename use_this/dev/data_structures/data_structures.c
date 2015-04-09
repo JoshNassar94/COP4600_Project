@@ -182,6 +182,22 @@ int find_alias_linked_list(linked_list * linkedlist, char* name){
 	return 0;
 }
 
+char* get_alias_linked_list(linked_list* linkedlist, char* name){
+	if(linkedlist->start == NULL){
+		return 0;
+	}
+	node * current_node = linkedlist->start;
+	if(strcmp(current_node->alias_name, name) == 0){
+		return current_node->data;
+	}
+	while(current_node->next != NULL){
+		if(strcmp(current_node->next->alias_name, name) == 0)
+			return current_node->next->data;
+		current_node = current_node->next;
+	}
+	return 0;
+}
+
 void replace_value_alias_linked_list(linked_list * linkedlist, char* name, char* cmd){
 	node * current_node = linkedlist->start;
 	if(strcmp(current_node->alias_name, name) == 0){
