@@ -124,6 +124,17 @@ char * insert_env(char* input)
 	return s;
 }
 
+char * tilda_expansion(char * input)
+{
+	printf("doing tilda things\n");
+	char * s = input;
+	int i;
+	if (strlen(s) == 1) return replace(s, "~", getenv("HOME"));
+	if (s[0] == '~', s[1] == '/') return replace(s, "~", getenv("HOME"));
+	return s;
+}
+
+
 
 %}
 %token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND GT GTGT LT PIPE TEST
@@ -492,7 +503,7 @@ arg_list:
 		|
 		arg_list arg
 		{
-			$2 = remove_quotes(insert_env($2));		//change all instances of ${ENV} to the coresponding variable
+			$2 = remove_quotes(tilda_expansion(insert_env($2)));		//change all instances of ${ENV} to the coresponding variable
 			command_node * cn = $1;
 			if(is_alias($2, alias_list)){
 				const char s[2] = " ";
