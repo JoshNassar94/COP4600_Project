@@ -16,6 +16,7 @@ unsetenv			return UNSET_ENV;
 alias				return ALIAS;
 unalias				return UNALIAS;
 &				return AMPERSAND;
+\\\ 			yylval.string=strdup(yytext); return ESCAPE_SPACE;
 2\>&1				return ERR_TO_OUT;
 2\>				return ERR_GT;
 \<				return LT;
@@ -23,7 +24,7 @@ unalias				return UNALIAS;
 \>				return GT;
 \|				return PIPE;
 \"["$" a-zA-Z0-9\/\-\<\>&*?\|_.\{\}\\=-]+\"		yylval.string=strdup(yytext); return WORD;
-[^\<\>\|& \n]+								yylval.string=strdup(yytext); return WORD;
+[^\<\>\|&\\ \n]+								yylval.string=strdup(yytext); return WORD;
 \n          			return NEW_LINE;       
 [ \t]+                  /* ignore whitespace */;
 %%

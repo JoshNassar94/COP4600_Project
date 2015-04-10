@@ -140,7 +140,7 @@ char * tilda_expansion(char * input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE TEST ERR_TO_OUT
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE ERR_TO_OUT ESCAPE_SPACE
 
 %union
 {
@@ -150,7 +150,7 @@ char * tilda_expansion(char * input)
 }
 %left CD ALIAS WORD
 %token <string> WORD
-%token <string> TEST
+%token <string> ESCAPE_SPACE
 %type <linkedlist> arg_list
 %type <linkedlist> cmd
 %type <string> arg
@@ -180,7 +180,7 @@ change_dir:
 		setenv("PWD", getenv("HOME"), 1);
 	}
 	| CD AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");}
-	| CD WORD
+	| CD arg
 	{
 		$2 = insert_env($2);
 		char* dest = remove_quotes($2);
@@ -193,7 +193,7 @@ change_dir:
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
 	}
-	| CD WORD AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");};
+	| CD arg AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");};
 	
 bye:
 	BYE
@@ -511,7 +511,20 @@ arg_list:
 			$$ = $1;
 		}
 	
-arg: WORD{$$=$1;}
-	
+arg: 
+	WORD
+	{
+		$$=$1;
+	}
+	| WORD ESCAPE_SPACE WORD
+	{
+		printf("In word esc word\n");
+		char buf[4096];
+		strcpy(buf, $1);
+		strcat(buf, " ");
+		strcat(buf, $3);
+		$$ = buf;
+		printf("%s\n", buf);
+	};
 %%
 
