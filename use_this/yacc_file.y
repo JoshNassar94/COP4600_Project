@@ -4,6 +4,7 @@
 #include "dev/data_structures/data_structures.h"
 #include "dev/user_created_commands.h"
 #include <stdlib.h>
+#include <pwd.h>
 
 #define HOME getenv("HOME")
 #define PWD getenv("PWD")
@@ -136,6 +137,18 @@ char * tilde_expansion(char * input)
 	int i;
 	if (strlen(s) == 1) return replace(s, "~", getenv("HOME"));
 	if (s[0] == '~', s[1] == '/') return replace(s, "~", getenv("HOME"));
+	if (s[0] == '~', strlen(s) > 1){
+		s++;
+		if(getpwnam(s) == NULL){
+			perror("getpwnam() error\n");
+		}
+		else{
+			struct passwd *p = getpwnam(s);
+			char ret[4096];
+			strcpy(ret, "/home/");
+			return strcat(ret, p->pw_name);
+		}
+	}
 	return s;
 }
 
