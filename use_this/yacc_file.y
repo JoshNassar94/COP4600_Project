@@ -130,7 +130,7 @@ char * insert_env(char* input)
 	return s;
 }
 
-char * tilda_expansion(char * input)
+char * tilde_expansion(char * input)
 {
 	char * s = input;
 	int i;
@@ -184,8 +184,7 @@ change_dir:
 	| CD AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");}
 	| CD arg
 	{
-		$2 = insert_env($2);
-		char* dest = remove_quotes($2);
+		char* dest = remove_quotes(tilde_expansion(insert_env($2)));
 		if(is_alias(dest, alias_list)){
 			dest = get_alias_linked_list(alias_list, dest);
 		}
@@ -226,8 +225,8 @@ print_enviro:
 set_enviro:
 	SET_ENV arg arg
 	{
-		char* envname = remove_quotes(insert_env($<string>2));
-		char* envval = remove_quotes(insert_env($<string>3));
+		char* envname = remove_quotes(tilde_expansion(insert_env($<string>2)));
+		char* envval = remove_quotes(tilde_expansion(insert_env($<string>3)));
 		int result = setenv(envname, envval, 1);
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
@@ -237,7 +236,7 @@ set_enviro:
 unset_enviro:
 	UNSET_ENV arg
 	{
-		char* name = remove_quotes(insert_env($<string>2));
+		char* name = remove_quotes(tilde_expansion(insert_env($<string>2)));
 		if(getenv(name))
 			unsetenv(name);
 		else
@@ -253,8 +252,7 @@ alias:
 	| ALIAS AMPERSAND{fprintf(stderr,"error: cannot list aliases in the background!\n");}
 	| ALIAS arg arg
 	{
-		char* arg = insert_env($<string>3);
-		arg = remove_quotes(arg);
+		char* arg = remove_quotes(tilde_expansion(insert_env($<string>3)));
 		check_alias_list(alias_list, $2, arg);
 	}
 	| ALIAS arg arg AMPERSAND{fprintf(stderr,"error: cannot create an alias in the background!\n");};
@@ -262,7 +260,8 @@ alias:
 unalias:
 	UNALIAS arg
 	{
-		remove_alias_linked_list(alias_list, $2);
+		char* arg = remove_quotes(tilde_expansion(insert_env($<string>2)));
+		remove_alias_linked_list(alias_list, arg);
 	}
 	| UNALIAS arg AMPERSAND{fprintf(stderr,"error: cannot call unalias in the background!\n");};		
 full_cmd:
@@ -498,7 +497,7 @@ arg_list:
 		|
 		arg_list arg
 		{
-			$2 = remove_quotes(tilda_expansion(insert_env($2)));		//change all instances of ${ENV} to the coresponding variable
+			$2 = remove_quotes(tilde_expansion(insert_env($2)));		//change all instances of ${ENV} to the coresponding variable
 			command_node * cn = $1;
 			if(is_alias($2, alias_list)){
 				const char s[2] = " ";
