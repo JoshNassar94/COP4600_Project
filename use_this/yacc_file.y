@@ -179,15 +179,7 @@ change_dir:
 		chdir(getenv("HOME"));
 		setenv("PWD", getenv("HOME"), 1);
 	}
-	| CD AMPERSAND
-	{
-		int process = fork();
-		if(process == 0){
-			chdir(getenv("HOME"));
-			setenv("PWD", getenv("HOME"), 1);
-			exit(1);
-		}
-	}
+	| CD AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");}
 	| CD WORD
 	{
 		$2 = insert_env($2);
@@ -196,28 +188,12 @@ change_dir:
 			dest = get_alias_linked_list(alias_list, dest);
 		}
 		if(chdir(dest) == -1)
-			printf("No such directory!\n");
+			perror("No such directory!\n");
 		char pwd[4096];
 		getcwd(pwd, sizeof(pwd));
 		setenv("PWD", pwd, 1);
 	}
-	| CD WORD AMPERSAND
-	{
-		int process = fork();
-		if(process == 0){
-			$2 = insert_env($2);
-			char* dest = remove_quotes($2);
-			if(is_alias(dest, alias_list)){
-				dest = get_alias_linked_list(alias_list, dest);
-			}
-			if(chdir(dest) == -1)
-				printf("No such directory!\n");
-			char pwd[4096];
-			getcwd(pwd, sizeof(pwd));
-			setenv("PWD", pwd, 1);
-			exit(1);
-		}
-	};
+	| CD WORD AMPERSAND{fprintf(stderr,"error: cannot run cd in the background!\n");};
 	
 bye:
 	BYE
@@ -243,17 +219,7 @@ print_enviro:
 			printf("%s\n", environ[i++]);
 		char* path = getenv("PATH");
 	}
-	| PRINT_ENV AMPERSAND
-	{
-		int process = fork();
-		if(process == 0){
-			extern char **environ;
-			int i=0;
-			while(environ[i])
-				printf("%s\n", environ[i++]);
-			char* path = getenv("PATH");
-		}
-	};
+	| PRINT_ENV AMPERSAND{fprintf(stderr,"error: cannot run printenv in the background!\n");};
 	
 set_enviro:
 	SET_ENV WORD WORD
@@ -263,7 +229,8 @@ set_enviro:
 		int result = setenv(envname, envval, 1);
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
-	};
+	}
+	| SET_ENV WORD WORD AMPERSAND{fprintf(stderr,"error: cannot run setenv in the background!\n");};
 	
 unset_enviro:
 	UNSET_ENV WORD
@@ -273,33 +240,29 @@ unset_enviro:
 			unsetenv(name);
 		else
 			printf("No variable named %s.\n", name);
-	};
+	}
+	| UNSET_ENV WORD AMPERSAND{fprintf(stderr,"error: cannot run unsetenv in the background!\n");};
 	
 alias:
 	ALIAS
 	{
 		print_alias_linked_list(alias_list);
 	}
-	| ALIAS AMPERSAND
-	{
-		int process = fork();
-		if(process == 0){
-			print_alias_linked_list(alias_list);
-			exit(1);
-		}
-	}
+	| ALIAS AMPERSAND{fprintf(stderr,"error: cannot list aliases in the background!\n");}
 	| ALIAS WORD WORD
 	{
 		char* arg = insert_env($<string>3);
 		arg = remove_quotes(arg);
 		check_alias_list(alias_list, $2, arg);
-	};
+	}
+	| ALIAS WORD WORD AMPERSAND{fprintf(stderr,"error: cannot create an alias in the background!\n");};
 	
 unalias:
 	UNALIAS WORD
 	{
 		remove_alias_linked_list(alias_list, $2);
-	};		
+	}
+	| UNALIAS WORD AMPERSAND{fprintf(stderr,"error: cannot call unalias in the background!\n");};		
 full_cmd:
 	cmd
 	{
