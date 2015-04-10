@@ -119,11 +119,13 @@ char * insert_env(char* input)
 		}
 	
 	}
+	/*
 	char* pos;
 	if(pos = strchr(s, '\\')){
 		s = handle_escape_char(s, "\\", pos);
 		printf("%s\n", s);
 	}
+	*/
 	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
 	return s;
 }
@@ -140,7 +142,7 @@ char * tilda_expansion(char * input)
 
 
 %}
-%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE ERR_TO_OUT ESCAPE_SPACE
+%token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE ERR_TO_OUT ESCAPE
 
 %union
 {
@@ -150,7 +152,7 @@ char * tilda_expansion(char * input)
 }
 %left CD ALIAS WORD
 %token <string> WORD
-%token <string> ESCAPE_SPACE
+%token <string> ESCAPE
 %type <linkedlist> arg_list
 %type <linkedlist> cmd
 %type <string> arg
@@ -516,12 +518,14 @@ arg:
 	{
 		$$=$1;
 	}
-	| WORD ESCAPE_SPACE WORD
+	| WORD ESCAPE WORD
 	{
 		printf("In word esc word\n");
 		char buf[4096];
+		char* tmp = $2;
+		tmp++;
 		strcpy(buf, $1);
-		strcat(buf, " ");
+		strcat(buf, tmp);
 		strcat(buf, $3);
 		$$ = buf;
 		printf("%s\n", buf);

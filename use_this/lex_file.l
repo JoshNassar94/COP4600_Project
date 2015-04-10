@@ -16,7 +16,7 @@ unsetenv			return UNSET_ENV;
 alias				return ALIAS;
 unalias				return UNALIAS;
 &				return AMPERSAND;
-\\\ 			yylval.string=strdup(yytext); return ESCAPE_SPACE;
+\\[^\n]			yylval.string=strdup(yytext); return ESCAPE;
 2\>&1				return ERR_TO_OUT;
 2\>				return ERR_GT;
 \<				return LT;
