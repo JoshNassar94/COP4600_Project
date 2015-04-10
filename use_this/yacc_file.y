@@ -224,7 +224,7 @@ print_enviro:
 	| PRINT_ENV AMPERSAND{fprintf(stderr,"error: cannot run printenv in the background!\n");};
 	
 set_enviro:
-	SET_ENV WORD WORD
+	SET_ENV arg arg
 	{
 		char* envname = remove_quotes(insert_env($<string>2));
 		char* envval = remove_quotes(insert_env($<string>3));
@@ -232,10 +232,10 @@ set_enviro:
 		if(result == -1)
 			printf("Failed to set variable %s to %s.\n", envname, envval);
 	}
-	| SET_ENV WORD WORD AMPERSAND{fprintf(stderr,"error: cannot run setenv in the background!\n");};
+	| SET_ENV arg arg AMPERSAND{fprintf(stderr,"error: cannot run setenv in the background!\n");};
 	
 unset_enviro:
-	UNSET_ENV WORD
+	UNSET_ENV arg
 	{
 		char* name = remove_quotes(insert_env($<string>2));
 		if(getenv(name))
@@ -243,7 +243,7 @@ unset_enviro:
 		else
 			printf("No variable named %s.\n", name);
 	}
-	| UNSET_ENV WORD AMPERSAND{fprintf(stderr,"error: cannot run unsetenv in the background!\n");};
+	| UNSET_ENV arg AMPERSAND{fprintf(stderr,"error: cannot run unsetenv in the background!\n");};
 	
 alias:
 	ALIAS
@@ -251,20 +251,20 @@ alias:
 		print_alias_linked_list(alias_list);
 	}
 	| ALIAS AMPERSAND{fprintf(stderr,"error: cannot list aliases in the background!\n");}
-	| ALIAS WORD WORD
+	| ALIAS arg arg
 	{
 		char* arg = insert_env($<string>3);
 		arg = remove_quotes(arg);
 		check_alias_list(alias_list, $2, arg);
 	}
-	| ALIAS WORD WORD AMPERSAND{fprintf(stderr,"error: cannot create an alias in the background!\n");};
+	| ALIAS arg arg AMPERSAND{fprintf(stderr,"error: cannot create an alias in the background!\n");};
 	
 unalias:
-	UNALIAS WORD
+	UNALIAS arg
 	{
 		remove_alias_linked_list(alias_list, $2);
 	}
-	| UNALIAS WORD AMPERSAND{fprintf(stderr,"error: cannot call unalias in the background!\n");};		
+	| UNALIAS arg AMPERSAND{fprintf(stderr,"error: cannot call unalias in the background!\n");};		
 full_cmd:
 	cmd
 	{
@@ -520,7 +520,6 @@ arg:
 	}
 	| WORD ESCAPE WORD
 	{
-		printf("In word esc word\n");
 		char buf[4096];
 		char* tmp = $2;
 		tmp++;
@@ -528,7 +527,6 @@ arg:
 		strcat(buf, tmp);
 		strcat(buf, $3);
 		$$ = buf;
-		printf("%s\n", buf);
 	};
 %%
 
