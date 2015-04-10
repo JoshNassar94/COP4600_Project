@@ -23,7 +23,7 @@ unalias				return UNALIAS;
 \>\>				return GTGT;
 \>				return GT;
 \|				return PIPE;
-\"[^\<\>\|&\\\n]+\"		yylval.string=strdup(yytext); return WORD;
+\"[^\\\n]+\"		yylval.string=strdup(yytext); return WORD;
 [^\<\>\|&\\ \n]+								yylval.string=strdup(yytext); return WORD;
 \n          			return NEW_LINE;       
 [ \t]+                  /* ignore whitespace */;
