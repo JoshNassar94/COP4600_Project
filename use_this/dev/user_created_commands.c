@@ -133,7 +133,15 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 					chdir(getenv("PWD"));
 				}
 				else{
-					
+					memcpy(searchDest, &word[0],slashIndex);
+					searchDest[slashIndex] = '/';
+					searchDest[slashIndex+1] = '\0';
+					memcpy(searchWord, &word[slashIndex+1], strlen(word)-slashIndex);
+					searchWord[strlen(word)-slashIndex] = '\0';
+					chdir(searchDest);
+					char pwd[4096];
+					getcwd(pwd, sizeof(pwd));
+					setenv("PWD", pwd, 1);
 				}
 			}
 			else{
