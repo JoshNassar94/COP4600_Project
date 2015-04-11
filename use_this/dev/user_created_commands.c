@@ -65,6 +65,7 @@ void resolve_error(char * err_file, int tostd)
 	int fd;
 	if (tostd) 
 	{
+		perror("to std input");
 		close(STDERR_FILENO);
 		dup(STDIN_FILENO);
 	}

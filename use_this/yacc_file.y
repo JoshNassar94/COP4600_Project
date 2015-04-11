@@ -32,11 +32,11 @@ linked_list* alias_list;
 int error_code = 0;
 
 //These are the in and out ifle for a command
-char * in_file;
-char * out_file;
-char * err_file;
-int out_append;
-int to_std_in;
+char * in_file = NULL;
+char * out_file = NULL;
+char * err_file= NULL;
+int out_append = 0;
+int to_std_in = 1;
 
 void yyerror(const char *str)
 {
@@ -361,11 +361,12 @@ full_cmd:
 							break;	
 							
 							case MIDDLE:
+								perror("In middle");
 								if (dup2(current_cmd->fd[READ_END], STDIN_FILENO) == SYSCALLERR) { printf("ERROR"); }
 								if (dup2(current_cmd->next->fd[WRITE_END], STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
-								
+								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
 								resolve_error(err_file, to_std_in);
-								
+								perror("executing middle");
 								execute_externel_command(current_cmd, alias_list);
 								exit(0);
 							
