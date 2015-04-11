@@ -291,7 +291,6 @@ full_cmd:
 			int status;
 			pid_t pid;
 			command_node * current_cmd = $1;
-			printf("First cmd: %s\n", current_cmd->cmd->start->data);
 			while (current_cmd)
 			{
 				switch( pid = fork() )
