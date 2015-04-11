@@ -37,7 +37,6 @@ char * out_file;
 char * err_file;
 int out_append;
 int to_std_in;
-int first_time;
 
 void yyerror(const char *str)
 {
@@ -141,7 +140,6 @@ char * tilde_expansion(char * input)
 
 int main()
 {
-	first_time = 1;
 	alias_list = create_linked_list();
 	printf("**********************************\n");
 	printf("*--------------------------------*\n");
@@ -333,8 +331,6 @@ full_cmd:
 							case ONLY_ONE:
 								resolve_input(in_file);
 								resolve_output(out_file, out_append);
-								if(first_time == 0)
-									resolve_error(err_file, to_std_in);
 								execute_externel_command(current_cmd, alias_list);
 								exit(0);
 							break;
@@ -397,7 +393,6 @@ full_cmd:
 		out_file = NULL;
 		err_file = NULL;
 		to_std_in = 1;
-		first_time = 0;
 	}
 	| cmd AMPERSAND
 	{
