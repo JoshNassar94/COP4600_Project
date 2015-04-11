@@ -137,7 +137,8 @@ char * tilde_expansion(char * input)
 	int i;
 	if (strlen(s) == 1) return replace(s, "~", getenv("HOME"));
 	if (s[0] == '~', s[1] == '/') return replace(s, "~", getenv("HOME"));
-	if (s[0] == '~', strlen(s) > 1){
+	if (s[0] == '~' && strlen(s) > 1){
+		printf("In tilde expansion\n");
 		s++;
 		if(getpwnam(s) == NULL){
 			perror("getpwnam() error\n");
@@ -290,6 +291,7 @@ full_cmd:
 			int status;
 			pid_t pid;
 			command_node * current_cmd = $1;
+			printf("First cmd: %s\n", current_cmd->cmd->start->data);
 			while (current_cmd)
 			{
 				switch( pid = fork() )
