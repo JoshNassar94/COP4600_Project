@@ -165,13 +165,7 @@ int main()
 			tok = strtok(NULL, s);
 			first = 0;
 		}
-		if(strcmp(userInput, "wc ") == 0){
-			printf("error: cannot call wc with no arguments\n");
-			strcpy(userInput, "");
-			
-		}
-		else
-			retokenize(userInput);
+		retokenize(userInput);
 		strcpy(userInput, "");
 	}
 	return 0;

@@ -195,14 +195,14 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 		}
 		else{
 			if(execve(path, arguments, envp)<0){
-				puts("execve has failed");
+				puts("error: execve has failed");
 			}
 			return;
 		}
 	}
 	else{
 		if(execve(command, arguments, envp)<0){
-			puts("execve has failed");
+			puts("error: execve has failed");
 		}
 	}
 }
