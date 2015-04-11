@@ -49,21 +49,6 @@ int yywrap()
         return 1;
 } 
   
-int main()
-{
-	first_time = 1;
-	alias_list = create_linked_list();
-	printf("**********************************\n");
-	printf("*--------------------------------*\n");
-	printf("*------Welcome to the Shell------*\n");
-	printf("*--------------------------------*\n");
-	printf("**********************************\n");
-	while(1){
-		printf("%s$ ",PWD);
-		yyparse();
-	}
-	return 0;
-} 
 
 char *replace(char *str, char *orig, char * rep)
 {
@@ -154,6 +139,36 @@ char * tilde_expansion(char * input)
 }
 
 
+int main()
+{
+	first_time = 1;
+	alias_list = create_linked_list();
+	printf("**********************************\n");
+	printf("*--------------------------------*\n");
+	printf("*------Welcome to the Shell------*\n");
+	printf("*--------------------------------*\n");
+	printf("**********************************\n");
+	while(1){
+		printf("%s$ ",PWD);
+		char tmp[4096];
+		char userInput[4096];
+		char s[2] = " ";
+		fgets(tmp, 4096, stdin);
+		strtok(tmp, "\n");
+		char* tok = strtok(tmp, s);
+		while(tok != NULL){
+			if(is_alias(tok, alias_list))
+				strcat(userInput, get_alias_linked_list(alias_list, tok));
+			else
+				strcat(userInput, tok);
+			strcat(userInput, " ");
+			tok = strtok(NULL, s);
+		}
+		retokenize(userInput);
+		strcpy(userInput, "");
+	}
+	return 0;
+} 
 
 %}
 %token CD BYE PRINT_ENV SET_ENV UNSET_ENV NEW_LINE ALIAS UNALIAS AMPERSAND ERR_GT GT GTGT LT PIPE ERR_TO_OUT ESCAPE
@@ -174,7 +189,7 @@ char * tilde_expansion(char * input)
 commands:
 		| commands command
 		{
-			printf("\n%s$ ",getenv("PWD"));
+			//printf("\n%s$ ",getenv("PWD"));
 		};
 
 command:
@@ -267,17 +282,14 @@ alias:
 	| ALIAS arg arg
 	{
 		char* args = remove_quotes(tilde_expansion(insert_env($<string>3)));
-		//strcat(args, " ");
 		char tmp[4096];
 		strcpy(tmp, args);
-		printf("args: %s\n", args);
 		char* tok = strtok(tmp, " ");
 		if(is_alias(tok, alias_list)){
 			char ret[4096];
 			strcat(ret, get_alias_linked_list(alias_list, tok));
 			strcat(ret, " ");
 			tok = strtok(NULL, " ");
-			printf("tok: %s\n", tok);
 			while(tok != NULL){
 				strcat(ret, tok);
 				tok = strtok(NULL, " ");
