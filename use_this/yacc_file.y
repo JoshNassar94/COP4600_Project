@@ -156,13 +156,16 @@ int main()
 		fgets(tmp, 4096, stdin);
 		strtok(tmp, "\n");
 		char* tok = strtok(tmp, s);
+		int first = 1;
 		while(tok != NULL){
-			if(is_alias(tok, alias_list))
+			if(is_alias(tok, alias_list) && first){
 				strcat(userInput, get_alias_linked_list(alias_list, tok));
+			}
 			else
 				strcat(userInput, tok);
 			strcat(userInput, " ");
 			tok = strtok(NULL, s);
+			first = 0;
 		}
 		retokenize(userInput);
 		strcpy(userInput, "");
