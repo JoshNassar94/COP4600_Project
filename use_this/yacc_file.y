@@ -337,9 +337,9 @@ full_cmd:
 							
 							case FIRST:
 								
-								if (close(STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
-								if (dup(current_cmd->next->fd[WRITE_END]) != 1)  { printf("ERROR"); }
-								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
+								if (close(STDOUT_FILENO) == SYSCALLERR) { perror("ERROR"); }
+								if (dup(current_cmd->next->fd[WRITE_END]) != 1)  { perror("ERROR"); }
+								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { perror("ERROR"); }
 								resolve_input(in_file);		
 								resolve_error(err_file, to_std_in);	
 								
@@ -349,9 +349,9 @@ full_cmd:
 							
 							case LAST:
 								
-								if (close(STDIN_FILENO) == SYSCALLERR) { printf("ERROR 1\n"); }
-								if (dup(current_cmd->fd[READ_END]) != 0)  { printf("ERROR 2\n"); }
-								//if (close(current_cmd->fd[WRITE_END]) == SYSCALLERR)  { printf("ERROR 3\n"); }
+								if (close(STDIN_FILENO) == SYSCALLERR) { perror("ERROR 1\n"); }
+								if (dup(current_cmd->fd[READ_END]) != 0)  { perror("ERROR 2\n"); }
+								//if (close(current_cmd->fd[WRITE_END]) == SYSCALLERR)  { perror("ERROR 3\n"); }
 								resolve_output(out_file, out_append);
 								resolve_error(err_file, to_std_in);
 								
@@ -361,12 +361,10 @@ full_cmd:
 							break;	
 							
 							case MIDDLE:
-								perror("In middle");
-								if (dup2(current_cmd->fd[READ_END], STDIN_FILENO) == SYSCALLERR) { printf("ERROR"); }
-								if (dup2(current_cmd->next->fd[WRITE_END], STDOUT_FILENO) == SYSCALLERR) { printf("ERROR"); }
-								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { printf("ERROR"); }
+								if (dup2(current_cmd->fd[READ_END], STDIN_FILENO) == SYSCALLERR) { perror("ERROR"); }
+								if (dup2(current_cmd->next->fd[WRITE_END], STDOUT_FILENO) == SYSCALLERR) { perror("ERROR"); }
+								if (close(current_cmd->next->fd[READ_END]) == SYSCALLERR)  { perror("ERROR"); }
 								resolve_error(err_file, to_std_in);
-								perror("executing middle");
 								execute_externel_command(current_cmd, alias_list);
 								exit(0);
 							
@@ -382,7 +380,7 @@ full_cmd:
 						{
 							close(current_cmd->next->fd[WRITE_END]);
 						}
-						free_linked_list(current_cmd->cmd);
+						//free_linked_list(current_cmd->cmd);
 						waitpid(pid, &status, 0);
 
 					break;
