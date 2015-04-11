@@ -174,7 +174,7 @@ char * tilde_expansion(char * input)
 commands:
 		| commands command
 		{
-			printf("%s$ ",getenv("PWD"));
+			printf("\n%s$ ",getenv("PWD"));
 		};
 
 command:
@@ -266,8 +266,25 @@ alias:
 	| ALIAS AMPERSAND{fprintf(stderr,"error: cannot list aliases in the background!\n");}
 	| ALIAS arg arg
 	{
-		char* arg = remove_quotes(tilde_expansion(insert_env($<string>3)));
-		check_alias_list(alias_list, $2, arg);
+		char* args = remove_quotes(tilde_expansion(insert_env($<string>3)));
+		//strcat(args, " ");
+		char tmp[4096];
+		strcpy(tmp, args);
+		printf("args: %s\n", args);
+		char* tok = strtok(tmp, " ");
+		if(is_alias(tok, alias_list)){
+			char ret[4096];
+			strcat(ret, get_alias_linked_list(alias_list, tok));
+			strcat(ret, " ");
+			tok = strtok(NULL, " ");
+			printf("tok: %s\n", tok);
+			while(tok != NULL){
+				strcat(ret, tok);
+				tok = strtok(NULL, " ");
+			}
+			args = ret;
+		}
+		check_alias_list(alias_list, $2, args);
 	}
 	| ALIAS arg arg AMPERSAND{fprintf(stderr,"error: cannot create an alias in the background!\n");};
 	
