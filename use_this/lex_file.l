@@ -39,6 +39,4 @@ void retokenize(char* str){
 	yy_switch_to_buffer(yy_scan_string(buf));
     if(yyparse())
 		printf("ERROR IN PARSING THE INPUT\n");
-	else
-		printf("DONE\n");
 }
