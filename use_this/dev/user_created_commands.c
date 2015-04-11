@@ -260,6 +260,18 @@ void execute_alias_command(char* word, linked_list * alias_list){
 }
  
 void check_alias_list(linked_list* alias_list, char* name, char* cmd){
+	char* tok;
+	const char s[2] = " ";
+	char tmp[4096];
+	strcpy(tmp, cmd);
+	tok = strtok(tmp, s);
+	while(tok != NULL){
+		if(strcmp(name, tok) == 0){
+			printf("error: infinite alias expansion!\n");
+			return;
+		}
+		tok = strtok(NULL, s);
+	}
 	if(find_alias_linked_list(alias_list, name) == 1){
 		printf("Replaced the already existing alias\n");
 		replace_value_alias_linked_list(alias_list, name, cmd);
