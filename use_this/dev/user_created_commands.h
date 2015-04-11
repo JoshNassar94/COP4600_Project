@@ -30,4 +30,6 @@ int checkFromBack(int, int, int, char*, node*);
 int checkFromFront(int, char*, node*);
 
 char* remove_quotes(char*);
+
+int hasSlash(char*);
 #endif

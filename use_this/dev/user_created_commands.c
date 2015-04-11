@@ -106,12 +106,41 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	int list_iter;
 	current_node = linkedlist->start;
 	node* copy_curr_node = ll_copy->start;
+	char* old_pwd = getenv("PWD");
 	for(list_iter = 0; list_iter < counter-1; ++list_iter){
 		index = isWildcard(copy_curr_node->next->data);
 		if(index != -1){
 			char* word = copy_curr_node->next->data;
 			linked_list* files = create_linked_list();
 			int numFiles = 0;
+			int slashIndex;
+			char searchDest[4096];
+			char searchWord[4096];
+			if((slashIndex = hasSlash(word)) != -1){
+				if(word[0] == '/'){
+					if(slashIndex == 0){
+						memcpy(searchDest, "/", 1);
+						searchDest[1] = '\0';
+					}
+					else{
+						memcpy(searchDest, &word[0],slashIndex);
+						searchDest[slashIndex] = '/';
+						searchDest[slashIndex+1] = '\0';
+					}
+					memcpy(searchWord, &word[slashIndex+1], strlen(word)-slashIndex);
+					searchWord[strlen(word)-slashIndex] = '\0';
+					setenv("PWD", searchDest, 1);
+					chdir(getenv("PWD"));
+				}
+				else{
+					
+				}
+			}
+			else{
+				memcpy(searchWord, word, strlen(word));
+				searchWord[strlen(word)] = '\0';
+				memcpy(searchDest, getenv("PWD"),strlen(getenv("PWD")));
+			}
 			DIR *d;
 			struct dirent *dir;
 			d = opendir(getenv("PWD"));
@@ -124,7 +153,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 			remove_linked_list(files, numFiles);
 			remove_linked_list(files, numFiles-1);
 			numFiles -= 2;
-			list_element_count += addWildcardArguments(files, numFiles, 0, linkedlist, copy_curr_node->next, index, word, list_element_count);
+			list_element_count += addWildcardArguments(files, numFiles, 0, linkedlist, copy_curr_node->next, isWildcard(searchWord), searchWord, list_element_count);
 			free_linked_list(files);
 			copy_curr_node=copy_curr_node->next;
 			remove_linked_list(linkedlist, list_element_count);
@@ -401,11 +430,16 @@ int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart,
 		}
 	}
 	node* curr = files->start;
+	int ret = numMatchingFiles;
 	for(i = 0; i < numMatchingFiles; ++i){
-		insert_linked_list(ll, curr->data, insertAt);
+		if(strcmp(curr->data, ".") == 0 || strcmp(curr->data, "..") == 0){
+			--ret;
+		}
+		else
+			insert_linked_list(ll, curr->data, insertAt);
 		curr = curr->next;
 	}
-	return numMatchingFiles;
+	return ret;
 }
 
 int checkFromBack(int word_length, int index, int file_length, char* word, node* current_node){
@@ -435,4 +469,15 @@ char* remove_quotes(char* word){
 		ret[strlen(ret)-1] = 0;
 	}
 	return ret;
+}
+
+int hasSlash(char* word){
+	int length = strlen(word);
+	int i;
+	for(i = length; i > -1; --i){
+		if(word[i] == '/'){
+			return i;
+		}
+	}
+	return -1;
 }
