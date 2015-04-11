@@ -5,15 +5,15 @@ FEATURES NOT IMPLEMENTED
 	1) File Name Completion
 	
 	2) Using wildcard matching outside of the current directory.
-		For example: `ls /home/*`
-		
+	       For example: ls /home/*
+	
 	3) Using 3 or more pipes ending in an alias and trying to output to file
 		For example:
-		```
+		
 		alias a ls
 		alias b wc
 		a | b | b > out.txt
-		```
+		
 	4) Wildcard matching using more than one * or ? in a word
 
 FEATURES IMPLEMENTED
