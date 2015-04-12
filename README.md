@@ -7,6 +7,7 @@ The linked list data structure is contained within data_structures.c.
 
 
 FEATURES NOT IMPLEMENTED
+
 1) File Name Completion
 
 2) Using 3 or more pipes ending in an alias and trying to output to file
