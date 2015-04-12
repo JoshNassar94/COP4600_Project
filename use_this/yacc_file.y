@@ -24,6 +24,10 @@
 
 #define SYSCALLERR -1
 
+#define OUT_FILE_ERR 1
+#define IN_FILE_ERR 2
+#define ERR_FILE_ERR 3
+
 extern FILE *yyin;
 extern FILE *yyout;
 char* cd_pwd;
@@ -47,7 +51,13 @@ int yywrap()
 {
         return 1;
 } 
-  
+void error_handler(int error_code)
+{
+	if (error_code == OUT_FILE_ERR) printf("error: multiple out files found\n");
+	else if (error_code == IN_FILE_ERR) printf("error: multiple in files found\n");
+	else if (error_code == ERR_FILE_ERR) printf("error: multiple error files found\n");
+	
+}  
 
 char *replace(char *str, char *orig, char * rep)
 {
@@ -313,8 +323,7 @@ full_cmd:
 	{
 		if (error_code)
 		{
-			printf("error: unrecognized error\n");
-			error_code = 0;
+			error_handler(error_code);
 		}
 		else
 		{
@@ -482,14 +491,14 @@ cmd:
 		|
 		cmd LT WORD
 		{
-			if (in_file) error_code = 1;
+			if (in_file) error_code = IN_FILE_ERR;
 			command_node * cn = $1;
 			in_file = $3;
 		}
 		|
 		cmd GTGT WORD
 		{
-			if (out_file) error_code = 1;
+			if (out_file) error_code = OUT_FILE_ERR;
 			command_node * cn = $1;
 			out_file = $3;
 			out_append = 1;
@@ -497,7 +506,7 @@ cmd:
 		|
 		cmd GT WORD
 		{
-			if (out_file) error_code = 1;
+			if (out_file) error_code = OUT_FILE_ERR;
 			command_node * cn = $1;
 			out_file = $3;
 			out_append = 0;
@@ -505,12 +514,13 @@ cmd:
 		|
 		cmd ERR_TO_OUT
 		{
+			if (err_file) error_code = ERR_FILE_ERR;
 			to_std_in = 1;
 		}
 		|
 		cmd ERR_GT WORD
 		{
-			if (err_file) error_code =1;
+			if (err_file) error_code = ERR_FILE_ERR;
 			err_file = $3;
 			to_std_in = 0;
 			
