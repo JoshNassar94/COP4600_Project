@@ -191,6 +191,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	
 	if(command[0] != '/'){
 		if(find_path(path, command) == 0){
+			printf("%s: command not found\n", command);
 			return;
 		}
 		else{

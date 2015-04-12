@@ -54,8 +54,13 @@ int yywrap()
 void error_handler(int error_code)
 {
 	if (error_code == OUT_FILE_ERR) printf("error: multiple out files found\n");
-	else if (error_code == IN_FILE_ERR) printf("error: multiple in files found\n");
-	else if (error_code == ERR_FILE_ERR) printf("error: multiple error files found\n");
+	if (error_code == IN_FILE_ERR) printf("error: multiple in files found\n");
+	if (error_code == ERR_FILE_ERR) printf("error: multiple error files found\n");
+	in_file = NULL;
+	out_file = NULL;
+	err_file = NULL;
+	out_append = 0;
+	to_std_in = 1;
 	
 }  
 
@@ -324,6 +329,7 @@ full_cmd:
 		if (error_code)
 		{
 			error_handler(error_code);
+			error_code = 0;
 		}
 		else
 		{
