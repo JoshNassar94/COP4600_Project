@@ -82,5 +82,5 @@ FEATURES IMPLEMENTED
 7) Tilde Expansion
 
 	- ~name
-	- 
+	 
 	- ~ not followed by a user name
