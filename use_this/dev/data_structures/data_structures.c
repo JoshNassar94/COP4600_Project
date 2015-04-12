@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+//Creates a new linked list with null start and end pointers
 linked_list * create_linked_list(){
 	linked_list * linkedlist = malloc(sizeof(linked_list));
 	linkedlist->start = NULL;
@@ -9,6 +10,7 @@ linked_list * create_linked_list(){
 	return linkedlist;
 }
 
+//Takes a linked list, deletes it, frees the memory it used
 void free_linked_list(linked_list * linkedlist){
     node * current_node;
     node * next_current_node;
@@ -16,13 +18,14 @@ void free_linked_list(linked_list * linkedlist){
     while(current_node->next != NULL){
         
 		next_current_node = current_node->next;
-        //free the node itself
         free(current_node);
         current_node = next_current_node;
     }
 	free(linkedlist);
 }
 
+//Takes linked list and a string.
+//Creates a new node at the end of linked list with data=string input.
 void push_linked_list(linked_list * linkedlist, char * data){
 	node * new_node = malloc(sizeof(node));
 	new_node->data = data;
@@ -37,6 +40,8 @@ void push_linked_list(linked_list * linkedlist, char * data){
 	}
 }
 
+//Takes alias linked list, string name, string data.
+//Creates a new node at the end of linked list with data=data, alias_name=name.
 void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 	node * new_node = malloc(sizeof(node));
 	new_node->data = data;
@@ -52,6 +57,8 @@ void push_alias_linked_list(linked_list * linkedlist, char * name, char * data){
 	}
 }
 
+//Takes linked list, string data, int position.
+//Creates new node at position in linked list, data=data.
 void insert_linked_list(linked_list* linkedlist, char* data, int position){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -87,6 +94,8 @@ void insert_linked_list(linked_list* linkedlist, char* data, int position){
 	}
 }
 
+//Takes linked list.
+//Prints data from every node in linked list sequentially.
 void print_linked_list(linked_list * linkedlist){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -99,6 +108,8 @@ void print_linked_list(linked_list * linkedlist){
 	puts(current_node->data);
 }
 
+//Takes alias linked list.
+//Prints alias_name and data from every node in linked list sequentially.
 void print_alias_linked_list(linked_list * linkedlist){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -113,6 +124,8 @@ void print_alias_linked_list(linked_list * linkedlist){
 	printf("%s = %s\n",current_node->alias_name, current_node->data);
 }
 
+//Takes linked list and int position.
+//Removes the node at position from linked list.
 void remove_linked_list(linked_list * linkedlist, int position){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -135,6 +148,8 @@ void remove_linked_list(linked_list * linkedlist, int position){
 	}
 }
 
+//Takes linked list and string name.
+//Removes the node with alias_name=name from linked list.
 void remove_alias_linked_list(linked_list * linkedlist, char * name){
 	node * current_node = linkedlist->start;
 	if(current_node == NULL){
@@ -156,7 +171,7 @@ void remove_alias_linked_list(linked_list * linkedlist, char * name){
 	puts("That alias does not exist");
 }
 
-
+//Creates command node with next=NULL and index=-1.
 command_node * create_command_node(){
 	command_node * commandNode = malloc(sizeof(command_node));
 	commandNode->cmd = create_linked_list();
@@ -166,6 +181,9 @@ command_node * create_command_node(){
 	return commandNode;
 }
 
+//Takes alias linked list and string name.
+//Search for node in linked list with alias_name=name.
+//If it exists, return 1. Else, return 0.
 int find_alias_linked_list(linked_list * linkedlist, char* name){
 	if(linkedlist->start == NULL){
 		return 0;
@@ -182,6 +200,9 @@ int find_alias_linked_list(linked_list * linkedlist, char* name){
 	return 0;
 }
 
+//Takes alias linked list and string name.
+//Search for node in linked list with alias_name=name.
+//If it exists, return data stored in node. Else, return 0.
 char* get_alias_linked_list(linked_list* linkedlist, char* name){
 	if(linkedlist->start == NULL){
 		return 0;
@@ -198,6 +219,9 @@ char* get_alias_linked_list(linked_list* linkedlist, char* name){
 	return 0;
 }
 
+//Takes alias linked list, string name, string cmd.
+//Finds node with alias_name=name.
+//Sets data=cmd, returns.
 void replace_value_alias_linked_list(linked_list * linkedlist, char* name, char* cmd){
 	node * current_node = linkedlist->start;
 	if(strcmp(current_node->alias_name, name) == 0){

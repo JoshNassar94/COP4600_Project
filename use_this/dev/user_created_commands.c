@@ -30,10 +30,6 @@ void resolve_input(char* in_file)
 		dup(fd);
 		close(fd);
 	}
-	else
-	{
-
-	}
 }
 
 void resolve_output(char* out_file, int append)
@@ -52,15 +48,8 @@ void resolve_output(char* out_file, int append)
 		dup(fd);
 		close(fd);
 	}
-	else
-	{
-		/*perror("WE ARE HERE");
-		int fd;
-		fd = open("/dev/tty", O_WRONLY);
-		close(1);
-		dup(fd);*/
-	}
 }
+
 void resolve_error(char * err_file, int tostd)
 {
 	int fd;
@@ -84,16 +73,18 @@ void resolve_error(char * err_file, int tostd)
 
 }
 
+//Takes a command node and the alias linked list.
+//Tests if any argument is a wildcard, expands it.
+//Checks for aliases, expands them.
+//Executes command with given arguments
 void execute_externel_command(command_node * commandNode, linked_list * alias_list){
 	char * command;
 	char ** arguments;
 	char ** envp = {NULL};
-	//char * envp = getenv("PATH");
 	
 	linked_list * linkedlist = commandNode->cmd;
 	linked_list* ll_copy = create_linked_list();
 	
-	//count the number of elements in the linked list so we know how much memory to allocate for the array;
 	int list_element_count=1;
 	node * current_node = linkedlist->start;
 	int index;
@@ -173,7 +164,6 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 		}
 	}
 
-	//allocate the memory + 1 because argument list need to end with NULL pointer
 	arguments = malloc(sizeof(char *) * list_element_count + 1);
 	
 	int i=0;
@@ -224,6 +214,7 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	}
 }
 
+//Takes a path and filename, checks if the filename is an executable file on that path
 int checkifexecutable(const char* pth, const char* filename){
 	DIR *d;
 	struct dirent *dir;
@@ -238,6 +229,8 @@ int checkifexecutable(const char* pth, const char* filename){
 	return 0;
 }
 
+//Takes two strings, pth and exe
+//Checks if exe lies along path. Returns 1 if it does, 0 if not
 int find_path(char *pth, char *exe){
 	char* searchpath = getenv("PATH");
 	if(searchpath == NULL)
@@ -269,6 +262,8 @@ int find_path(char *pth, char *exe){
 	return found;
 }
 
+//Takes in a word and an alias linked list.
+//If word is an alias name, returns 1, else returns 0
 int is_alias(char* word, linked_list * list){
 	if(list->start == NULL)
 		return 0;
@@ -285,6 +280,9 @@ int is_alias(char* word, linked_list * list){
 	return 0;
 }
 
+//Takes in a word and alias linked list.
+//Gets data associated with the alias named word
+//Removes any quotes and retokenizes the alias data
 void execute_alias_command(char* word, linked_list * alias_list){
 	node * current_node = alias_list->start;
 	while(strcmp(word, current_node->alias_name) != 0)
@@ -313,6 +311,10 @@ void execute_alias_command(char* word, linked_list * alias_list){
 	return;
 }
  
+//Takes in alias linked list, string name, string cmd.
+//If cmd has the alias name in it, prints error and returns.
+//If alias name exists, replace data with cmd, return.
+//If alias name does not exist, create new alias name=cmd, return.
 void check_alias_list(linked_list* alias_list, char* name, char* cmd){
 	char* tok;
 	const char s[2] = " ";
@@ -336,46 +338,19 @@ void check_alias_list(linked_list* alias_list, char* name, char* cmd){
 	
 }
 
-const char* use_env_var(char* tok){
-	char * ret = tok;
-	int i;
-	int valid_so_far = 0;
-	int start;
-	int end;
-	for (i = 0; i < strlen(ret); i++)
-	{
-		if(ret[i] == '$') start = i;
-		if(ret[i] == '{' && i == start+1) valid_so_far = 1;
-		if(ret[i] == '}' && valid_so_far)
-		{
-			char subbuf[4096];
-			memcpy(subbuf, &ret[start], i-start+1);
-			subbuf[i-start+1] = '\0';
-			
-			char * var;
-			copystring(var, subbuf);
-			var = var + 2; 				//get rid of ${
-			var[i-start-2] = '\0';  		//get rid of ending }
-			
-			ret = replace(ret, subbuf, getenv(var));
-		}
-	}
-	return ret;
-}
-
+//Takes command node.
+//Returns number depending on which command it is.
 int which_command(command_node * cn)
 {	
-	/*printf("FOR: ");
-	print_linked_list(cn->cmd);
-	printf("next: %p\n", cn->next);
-	printf("index: %d\n", cn->index);*/
 	if (cn->next == NULL && cn->index == 0) return 0; //only one
 	if (cn->next != NULL && cn->index == 0) return 1; //first node
 	if (cn->next != NULL && cn->index != 0) return 2; //middle node
 	if (cn->next == NULL && cn->index != 0) return 3; //last node
 }
 
-
+//Takes a string.
+//If string has a * or ? return the index of that character.
+//Else, return 0.
 int isWildcard(char* word){
 	int length = strlen(word);
 	int i;
@@ -387,6 +362,11 @@ int isWildcard(char* word){
 	return -1;
 }
 
+//Takes linked list of files in current directory, number of files, number that already match, linked list of commands,
+//current node in command linked list, index of wildcard char, wildcard word, index of current node in command linked list.
+//Finds files in current directory that match the wildcard word. Removes others from linked_list files.
+//Adds all files in linked_list files to command linked list.
+//Returns number of files that were added.
 int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart, linked_list* ll, node* current, int index, char* word, int insertAt){
 	int numMatchingFiles = 0;
 	int word_length = strlen(word);
@@ -467,6 +447,9 @@ int addWildcardArguments(linked_list* files, int numFiles, int numMatchingStart,
 	return ret;
 }
 
+//Takes word length, index of wildcard character, file length, word, and file.
+//If the strings working backwards until the wildcard index are the same, return 1.
+//Else, return 0.
 int checkFromBack(int word_length, int index, int file_length, char* word, node* current_node){
 	int j, k;
 	for(j = word_length-1, k = file_length-1; j > index; --j, --k){
@@ -477,6 +460,9 @@ int checkFromBack(int word_length, int index, int file_length, char* word, node*
 	return 1;
 }
 
+//Takes index of wildcard character, word, and file.
+//If the strings working forwards until the wildcard index are the same, return 1.
+//Else, return 0.
 int checkFromFront(int index, char* word, node* current_node){
 	int j;
 	for(j = 0; j < index; ++j){
@@ -487,6 +473,9 @@ int checkFromFront(int index, char* word, node* current_node){
 	return 1;
 }
 
+//Takes a string.
+//If the string starts with quotes, remove quotes from the front and the back of the string.
+//Return the now quote-less string.
 char* remove_quotes(char* word){
 	char* ret = word;
 	if(ret[0] == '"'){
@@ -496,6 +485,8 @@ char* remove_quotes(char* word){
 	return ret;
 }
 
+//Takes a string.
+//If the string has any forward slashes, return the index of the last forward slash.
 int hasSlash(char* word){
 	int length = strlen(word);
 	int i;
