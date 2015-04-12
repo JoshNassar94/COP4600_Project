@@ -14,6 +14,7 @@
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+
 void resolve_input(char* in_file)
 {
 	if (in_file)
@@ -191,12 +192,27 @@ void execute_externel_command(command_node * commandNode, linked_list * alias_li
 	
 	if(command[0] != '/'){
 		if(find_path(path, command) == 0){
+			//So all of this junk around printf is to print to print 
+			//the error to stdout then return to the old fd after
+			int fd;
+			fd = open("/dev/tty", O_WRONLY);
+			int actual_out = close(1);
+			dup(fd);
 			printf("%s: command not found\n", command);
+			close(1);
+			dup(actual_out);
 			return;
 		}
 		else{
 			if(execve(path, arguments, envp)<0){
-				puts("error: execve has failed");
+				int fd;
+				fd = open("/dev/tty", O_WRONLY);
+				int actual_out = close(1);
+				dup(fd);
+				printf("execve has faild");
+				close(1);
+				dup(actual_out);
+				return;
 			}
 			return;
 		}
