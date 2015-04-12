@@ -29,7 +29,7 @@ unalias				return UNALIAS;
 [ \t]+                  /* ignore whitespace */;
 %%
 
-
+//This function takes in a string, tokenizes it, and calls yyparse
 void retokenize(char* str){
 	const int length = strlen(str);
 	char buf[length+1];

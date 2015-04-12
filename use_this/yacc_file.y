@@ -42,6 +42,7 @@ char * err_file= NULL;
 int out_append = 0;
 int to_std_in = 1;
 
+//Takes in a string, prints it to standard error
 void yyerror(const char *str)
 {
         fprintf(stderr,"error: %s\n",str);
@@ -51,6 +52,8 @@ int yywrap()
 {
         return 1;
 } 
+
+//Takes in an error code, prints out the corresponding error message
 void error_handler(int error_code)
 {
 	if (error_code == OUT_FILE_ERR) printf("error: multiple out files found\n");
@@ -64,6 +67,8 @@ void error_handler(int error_code)
 	
 }  
 
+//Takes in three strings: str, orig, rep.
+//If orig is in str, replace it with rep
 char *replace(char *str, char *orig, char * rep)
 {
 	static char buffer[4096];
@@ -78,21 +83,7 @@ char *replace(char *str, char *orig, char * rep)
 	return buffer;
 }
 
-char* handle_escape_char(char *str, char *orig, char* second_half)
-{
-	static char buffer[4096];
-	char *p;
-	if(!(p = strstr(str, orig))) return str; //is orig actually in str
-	
-	strncpy(buffer, str, p-str); //copy char from str start to orig into buffer
-	buffer[p-str] = str[p-str+1];
-	static char buffer2[4096];
-	
-	sprintf(buffer2, "%s%s%c", buffer, second_half+2, '\0');
-	
-	return buffer2;
-}
-
+//Takes a string. If it is an environment variable, replaces it with its value
 char * insert_env(char* input)
 {
 	char * s = input;
@@ -119,17 +110,10 @@ char * insert_env(char* input)
 		}
 	
 	}
-	/*
-	char* pos;
-	if(pos = strchr(s, '\\')){
-		s = handle_escape_char(s, "\\", pos);
-		printf("%s\n", s);
-	}
-	*/
-	//printf("%s", replace("Hello, world!\n", "world", "Miami"));
 	return s;
 }
 
+//Takes a string. If it is prefaced with a tilde, replace it with home directory
 char * tilde_expansion(char * input)
 {
 	char * s = input;
@@ -152,7 +136,7 @@ char * tilde_expansion(char * input)
 	return s;
 }
 
-
+//Prints out header. Reads in user input, replaces any aliases, then parses input
 int main()
 {
 	alias_list = create_linked_list();
@@ -203,10 +187,7 @@ int main()
 %type <string> arg
 %%
 commands:
-		| commands command
-		{
-			//printf("\n%s$ ",getenv("PWD"));
-		};
+		| commands command;
 
 command:
 	| NEW_LINE {/* do nothing */ }
