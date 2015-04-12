@@ -4,17 +4,14 @@ A korn shell for Linux created by Joshua Nassar and Alex Smith.
 FEATURES NOT IMPLEMENTED
 	1) File Name Completion
 	
-	2) Using wildcard matching outside of the current directory.
-	       For example: ls /home/*
-	
-	3) Using 3 or more pipes ending in an alias and trying to output to file
+	2) Using 3 or more pipes ending in an alias and trying to output to file
 		For example:
 		
 		alias a ls
 		alias b wc
 		a | b | b > out.txt
 		
-	4) Wildcard matching using more than one * or ? in a word
+	3) Wildcard matching using more than one * or ? in a word
 
 FEATURES IMPLEMENTED
 	1) Input Types
