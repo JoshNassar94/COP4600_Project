@@ -452,7 +452,7 @@ full_cmd:
 						{
 							close(current_cmd->next->fd[WRITE_END]);
 						}
-						free_linked_list(current_cmd->cmd);
+						//free_linked_list(current_cmd->cmd);
 
 					break;
 				}
