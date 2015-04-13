@@ -7,7 +7,7 @@ The linked list data structure is contained within data_structures.c.
 
 
 FEATURES NOT IMPLEMENTED
-=============================
+--------------------------
 
 1) File Name Completion
 
@@ -21,7 +21,7 @@ FEATURES NOT IMPLEMENTED
 3) Wildcard matching using more than one * or ? in a word
 
 FEATURES IMPLEMENTED
-=========================
+------------------------
 
 1) Input Types
 
@@ -89,6 +89,6 @@ FEATURES IMPLEMENTED
 	- ~ not followed by a user name
 
 ISSUES
-=======
+---------
 
 1) output when redirecting input into the shell is out of order. All the prompts are printed after execution.
