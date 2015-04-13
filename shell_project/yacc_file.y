@@ -5,6 +5,7 @@
 #include "dev/user_created_commands.h"
 #include <stdlib.h>
 #include <pwd.h>
+#include <unistd.h>
 
 #define HOME getenv("HOME")
 #define PWD getenv("PWD")
@@ -146,7 +147,8 @@ int main()
 	printf("*--------------------------------*\n");
 	printf("**********************************\n");
 	while(1){
-		printf("%s$ ",PWD);
+		if (isatty(fileno(stdin)))
+			printf("%s$ ",PWD);
 		char tmp[4096];
 		char userInput[4096];
 		char s[2] = " ";
